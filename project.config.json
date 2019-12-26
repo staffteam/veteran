@@ -1,0 +1,230 @@
+{
+	"description": "项目配置文件。",
+	"setting": {
+		"urlCheck": true,
+		"es6": true,
+		"postcss": true,
+		"minified": true,
+		"newFeature": true,
+		"coverView": true,
+		"autoAudits": false,
+		"checkInvalidKey": true,
+		"checkSiteMap": true,
+		"uploadWithSourceMap": true,
+		"babelSetting": {
+			"ignore": [],
+			"disablePlugins": [],
+			"outputPath": ""
+		}
+	},
+	"miniprogramRoot": "dist/wx/",
+	"compileType": "miniprogram",
+	"appid": "wx9c33546cf6982976",
+	"projectname": "%E5%86%9B%E6%88%8E%E9%A3%9E%E6%89%AC",
+	"simulatorType": "wechat",
+	"simulatorPluginLibVersion": {},
+	"condition": {
+		"search": {
+			"current": -1,
+			"list": []
+		},
+		"conversation": {
+			"current": -1,
+			"list": []
+		},
+		"plugin": {
+			"current": -1,
+			"list": []
+		},
+		"game": {
+			"currentL": -1,
+			"list": []
+		},
+		"miniprogram": {
+			"current": 25,
+			"list": [
+				{
+					"id": -1,
+					"name": "上课签到",
+					"pathName": "pages/signIn/main",
+					"query": "",
+					"scene": null
+				},
+				{
+					"id": -1,
+					"name": "课程签到详情",
+					"pathName": "pages/signInDetail/main",
+					"query": "",
+					"scene": null
+				},
+				{
+					"id": -1,
+					"name": "学员考勤",
+					"pathName": "pages/signInAdmin/main",
+					"query": "",
+					"scene": null
+				},
+				{
+					"id": -1,
+					"name": "课程直播",
+					"pathName": "pages/coursePlayback/main",
+					"query": "",
+					"scene": null
+				},
+				{
+					"id": -1,
+					"name": "课程直播详情",
+					"pathName": "pages/courseDetail/main",
+					"query": "",
+					"scene": null
+				},
+				{
+					"id": -1,
+					"name": "用户协议",
+					"pathName": "pages/agreement/main",
+					"query": "",
+					"scene": null
+				},
+				{
+					"id": -1,
+					"name": "确认信息第二步",
+					"pathName": "pages/affirmInfo/two/main",
+					"query": "",
+					"scene": null
+				},
+				{
+					"id": -1,
+					"name": "确认信息第三步",
+					"pathName": "pages/affirmInfo/three/main",
+					"query": "",
+					"scene": null
+				},
+				{
+					"id": -1,
+					"name": "我的",
+					"pathName": "pages/member/main",
+					"query": "",
+					"scene": null
+				},
+				{
+					"id": -1,
+					"name": "我的考试",
+					"pathName": "pages/my/exam/main",
+					"query": "",
+					"scene": null
+				},
+				{
+					"id": -1,
+					"name": "考试科目",
+					"pathName": "pages/my/examDetail/main",
+					"query": "",
+					"scene": null
+				},
+				{
+					"id": 11,
+					"name": "开始答题",
+					"pathName": "pages/my/examGo/main",
+					"query": "",
+					"scene": null
+				},
+				{
+					"id": -1,
+					"name": "考试结果",
+					"pathName": "pages/my/examResult/main",
+					"query": "",
+					"scene": null
+				},
+				{
+					"id": 13,
+					"name": "全部解析",
+					"pathName": "pages/my/examAnalysis/main",
+					"query": "analysis=all",
+					"scene": null
+				},
+				{
+					"id": 14,
+					"name": "员工查询",
+					"pathName": "pages/student/query/main",
+					"query": "",
+					"scene": null
+				},
+				{
+					"id": -1,
+					"name": "学员信息",
+					"pathName": "pages/student/info/main",
+					"query": "",
+					"scene": null
+				},
+				{
+					"id": -1,
+					"name": "企业招聘",
+					"pathName": "pages/recruitment/list/main",
+					"query": "",
+					"scene": null
+				},
+				{
+					"id": -1,
+					"name": "企业详情",
+					"pathName": "pages/recruitment/detail/main",
+					"query": "",
+					"scene": null
+				},
+				{
+					"id": 18,
+					"name": "工作方案",
+					"pathName": "pages/workProgram/list/main",
+					"query": "",
+					"scene": null
+				},
+				{
+					"id": 19,
+					"name": "工作方案详情",
+					"pathName": "pages/workProgram/detail/main",
+					"query": "",
+					"scene": null
+				},
+				{
+					"id": -1,
+					"name": "意见反馈",
+					"pathName": "pages/my/feedback/main",
+					"query": "",
+					"scene": null
+				},
+				{
+					"id": -1,
+					"name": "帮助中心",
+					"pathName": "pages/my/help/main",
+					"query": "",
+					"scene": null
+				},
+				{
+					"id": -1,
+					"name": "上课签到",
+					"pathName": "pages/student/sign/main",
+					"query": "",
+					"scene": null
+				},
+				{
+					"id": -1,
+					"name": "满意度调查",
+					"pathName": "pages/questionnaire/main",
+					"query": "",
+					"scene": null
+				},
+				{
+					"id": -1,
+					"name": "结业证书",
+					"pathName": "pages/my/diploma/main",
+					"query": "",
+					"scene": null
+				},
+				{
+					"id": -1,
+					"name": "人才空间",
+					"pathName": "pages/talentSpace/list/main",
+					"scene": null
+				}
+			]
+		}
+	}
+}

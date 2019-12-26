@@ -1,0 +1,86 @@
+{
+  "pages": [
+    "pages/index/main",
+    "pages/member/main",
+    "pages/my/aboutus/main",
+    "pages/my/diploma/main",
+    "pages/my/exam/main",
+    "pages/my/examDetail/main",
+    "pages/my/examGo/main",
+    "pages/my/examResult/main",
+    "pages/my/examAnalysis/main",
+    "pages/my/feedback/main",
+    "pages/my/help/main",
+    "pages/my/share/main",
+    "pages/my/sign/main",
+    "pages/agenda/list/main",
+    "pages/agenda/detail/main",
+    "pages/ceremony/list/main",
+    "pages/ceremony/detail/main",
+    "pages/closingCeremony/list/main",
+    "pages/closingCeremony/detail/main",
+    "pages/comingSoon/main",
+    "pages/course/playback/main",
+    "pages/course/detail/main",
+    "pages/entertainment/list/main",
+    "pages/entertainment/detail/main",
+    "pages/recruitment/list/main",
+    "pages/recruitment/detail/main",
+    "pages/questionnaire/main",
+    "pages/sign/in/main",
+    "pages/sign/detail/main",
+    "pages/sign/admin/main",
+    "pages/skillTraining/list/main",
+    "pages/skillTraining/detail/main",
+    "pages/structure/list/main",
+    "pages/structure/detail/main",
+    "pages/talentSpace/list/main",
+    "pages/talentSpace/detail/main",
+    "pages/testQuestions/main",
+    "pages/workProgram/list/main",
+    "pages/workProgram/detail/main",
+    "pages/agreement/main",
+    "pages/affirmInfo/one/main",
+    "pages/affirmInfo/two/main",
+    "pages/affirmInfo/three/main",
+    "pages/student/info/main",
+    "pages/student/query/main",
+    "pages/student/score/main",
+    "pages/student/sign/main"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#fff",
+    "navigationBarTitleText": "WeChat",
+    "navigationBarTextStyle": "black"
+  },
+  "tabBar": {
+    "color": "#999",
+    "backgroundColor": "#fafafa",
+    "selectedColor": "#E53330",
+    "borderStyle": "white",
+    "list": [{
+      "text": "首页",
+      "pagePath": "pages/index/main",
+      "iconPath": "static/tabs/home.png",
+      "selectedIconPath": "static/tabs/home-active.png"
+    }, {
+      "text": "我的",
+      "pagePath": "pages/member/main",
+      "iconPath": "static/tabs/member.png",
+      "selectedIconPath": "static/tabs/member-active.png"
+    }],
+    "position": "bottom"
+  },
+  "permission": {
+    "scope.userLocation": {
+      "desc": "你的位置信息将用于小程序定位"
+    }
+  },
+  "plugins": {
+    "tencentvideo": {
+      "version": "1.2.4",
+      "provider": "wxa75efa648b60994b"
+    }
+  }
+}

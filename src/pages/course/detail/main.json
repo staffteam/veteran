@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "课程直播",
+  "usingComponents": {
+    "txv-video": "plugin://tencentvideo/video"
+  }
+}
