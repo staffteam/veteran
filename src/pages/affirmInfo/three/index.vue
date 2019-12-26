@@ -131,7 +131,7 @@ export default {
           userInfo.hisCommander = this.userInfo.hisCommander;
           userInfo.retiredTime = this.userInfo.retiredTime;
           mpvue.setStorageSync("userInfo", userInfo);
-          mpvue.setStorageSync("loginKey", userInfo.loginKey);
+          mpvue.setStorageSync("userid", userInfo.userid);
           wx.switchTab({
             url: "../../index/main"
           });
@@ -146,7 +146,7 @@ export default {
       userInfo.hisCommander = this.userInfo.hisCommander;
       userInfo.retiredTime = this.userInfo.retiredTime;
       mpvue.setStorageSync("userInfo", userInfo);
-      mpvue.setStorageSync("loginKey", userInfo.loginKey);
+      mpvue.setStorageSync("userid", userInfo.userid);
       wx.switchTab({
         url: "../../index/main"
       });

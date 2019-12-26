@@ -103,8 +103,7 @@ export default {
   methods: {
     outLogin() {
       mpvue.removeStorageSync("userInfo");
-      mpvue.removeStorageSync("loginKey");
-      mpvue.removeStorageSync("loginCode");
+      mpvue.removeStorageSync("userid");
       mpvue.switchTab({
         url: "../index/main"
       });

@@ -8,7 +8,8 @@ const path = {
   '学员确认信息': `${api}/Member/InfoConfirm`,
   '用户反馈': `${api}/Member/SubmitMessage`,
   '教学点列表': `${api}/Member/GetSchoolList`,
-  '课程详情': `${api}/Course/GetVedioCourseDetail`
+  '课程详情': `${api}/Course/GetVedioCourseDetail`,
+  '登陆':`${api}/Member/Login`
 };
 const load = {
   show() {

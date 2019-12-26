@@ -152,7 +152,7 @@ export default {
       canIUse: wx.canIUse("button.open-type.getUserInfo"),
       isLogin: "-1",
       isGetCode: false,
-      isCode:""
+      isCode: ""
     };
   },
   methods: {
@@ -161,9 +161,16 @@ export default {
       var vm = this;
       var userInfo_ = e.mp.detail.userInfo;
       vm.hasUserInfo = true;
-      vm.getInfo(userInfo_, _ => {
-        vm.goLogin();
-      });
+      vm.getInfo(
+        {
+          detail: {
+            userInfo: userInfo_
+          }
+        },
+        _ => {
+          vm.goLogin();
+        }
+      );
     },
     showHint(text, time = 1000) {
       let vm = this;
@@ -173,6 +180,39 @@ export default {
         vm.commonMsg = false;
         vm.commonTitle = "";
       }, time);
+    },
+    getInfos(userid) {
+      let vm = this;
+      this.$api
+        .$signGet("根据手机号获取学员信息", {
+          phone: vm.form.phone,
+          userid: userid
+        })
+        .then(res => {
+          if (res.Success) {
+            let userInfo = mpvue.getStorageSync("userInfo");
+            mpvue.setStorageSync("userInfo", {
+              ...userInfo,
+              ...res.Data,
+              userid: userid,
+              wx_avatarUrl: userInfo.avatarUrl,
+              wx_city: userInfo.city
+            });
+            vm.form.phone = "";
+            vm.form.code = "";
+            vm.hasUserInfo = false;
+            mpvue.setStorageSync("oneLogin", "1");
+            mpvue.navigateTo({
+              url: "../affirmInfo/one/main"
+            });
+          } else {
+            mpvue.showToast({
+              title: res.Msg,
+              icon: "none",
+              duration: 1000
+            });
+          }
+        });
     },
     goLogin() {
       let vm = this;
@@ -186,29 +226,18 @@ export default {
         vm.showHint("验证码有误");
       } else {
         this.$api
-          .$signGet("根据手机号获取学员信息", {
-            phone: vm.form.phone,
-            userid: mpvue.getStorageSync("loginCode")
+          .$signGet("登陆", {
+            value: String(vm.form.phone)
           })
           .then(res => {
-            debugger;
-            if (res.ErrorCode == 1) {
-              let userInfo = mpvue.getStorageSync("userInfo");
-              mpvue.setStorageSync("userInfo", {
-                ...userInfo,
-                ...res.Data,
-                loginKey: mpvue.getStorageSync("loginCode"),
-                wx_avatarUrl: userInfo.avatarUrl,
-                wx_city: userInfo.city
-              });
-              vm.form.phone = "";
-              vm.form.code = "";
-              vm.hasUserInfo = false;
-              mpvue.setStorageSync("oneLogin", "1");
-              mpvue.navigateTo({
-                url: "../affirmInfo/one/main"
-              });
+            if (res.Success) {
+              vm.getInfos(res.Data);
             } else {
+              mpvue.showToast({
+                title: res.Msg,
+                icon: "none",
+                duration: 1000
+              });
             }
           });
       }
@@ -226,7 +255,7 @@ export default {
               phone: String(vm.form.phone)
             })
             .then(res => {
-              if (res.ErrorCode == 1) {
+              if (res.Success) {
                 mpvue.showToast({
                   title: "发送成功",
                   icon: "success",
@@ -260,12 +289,13 @@ export default {
   },
   created() {
     let userInfo = mpvue.getStorageSync("userInfo");
-    if (!userInfo.loginKey) {
+    if (!userInfo.userid) {
       //没有登录
       mpvue.hideTabBar();
     }
   },
   onShow() {
+    let vm = this;
     mpvue.setNavigationBarColor({
       frontColor: "#ffffff",
       backgroundColor: "#E53330",
@@ -274,38 +304,21 @@ export default {
         timingFunc: "easeIn"
       }
     });
-    if (!mpvue.getStorageSync("loginCode")) {
-      mpvue.login({
-        success: function(res) {
-          if (res.code) {
-            // 发起网络请求
-            let _code = res.code;
-            mpvue.setStorageSync("loginCode", _code);
-          } else {
-            mpvue.showToast({
-              title: "网络发生异常！",
-              icon: "none",
-              duration: 2000
-            });
-          }
-        }
-      });
-    }
     let oneLogin = mpvue.getStorageSync("oneLogin");
     let userInfo = mpvue.getStorageSync("userInfo");
-    let loginKey = mpvue.getStorageSync("loginKey");
+    let userid = mpvue.getStorageSync("userid");
     //没有认证但登录了，跳转至认证模块
-    if (!loginKey && userInfo && userInfo.loginKey && oneLogin != "1") {
+    if (!userid && userInfo && userInfo.userid && oneLogin != "1") {
       mpvue.redirectTo({
         url: "../affirmInfo/one/main"
       });
     } else {
       mpvue.setStorageSync("oneLogin", "-1");
-      if (userInfo.loginKey && loginKey) {
+      if (userInfo.userid && userid) {
         this.isLogin = "0";
         mpvue.showTabBar();
       }
-      if (!userInfo.loginKey) {
+      if (!userInfo.userid) {
         this.isLogin = "1";
         mpvue.hideTabBar();
       }

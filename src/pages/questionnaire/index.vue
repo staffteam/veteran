@@ -159,7 +159,7 @@ export default {
           url: `${vm.$api}/questionnaire/questionnaireFormSave`,
           data: {
             qid: vm.pid,
-            loginkey: mpvue.getStorageSync("sessionId"),
+            userid: mpvue.getStorageSync("userid"),
             nickname: mpvue.getStorageSync("nickName"),
             sex: upInfo.sex,
             age: upInfo.age,

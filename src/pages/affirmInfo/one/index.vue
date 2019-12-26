@@ -14,7 +14,7 @@
             <span>地&emsp;&emsp;区</span>
             <input
               type="text"
-              v-model="userInfo.city"
+              v-model="userInfo.Areas"
               placeholder-style="color:#e53330;"
               :disabled="isReadonly"
             />
@@ -71,20 +71,20 @@ export default {
       if (this.isReadonly) {
         this.isReadonly = false;
         this.hostInfo = {
-          city: this.userInfo.city,
+          Areas: this.userInfo.Areas,
           teachingPoint: this.userInfo.teachingPoint
         };
-        this.userInfo.city = "";
+        this.userInfo.Areas = "";
         this.userInfo.teachingPoint = "";
       } else {
         this.isReadonly = true;
-        this.userInfo.city = this.hostInfo.city;
+        this.userInfo.Areas = this.hostInfo.Areas;
         this.userInfo.teachingPoint = this.hostInfo.teachingPoint;
       }
     },
     gonext() {
       let vm = this;
-      if (vm.userInfo.city == "") {
+      if (vm.userInfo.Areas == "") {
         vm.showHint("请输入地区");
       } else if (vm.userInfo.teachingPoint == "") {
         vm.showHint("请输入教学点");
@@ -92,25 +92,24 @@ export default {
         if (!this.isReadonly) {
           this.errorCorrection = true;
         } else {
-          let userInfo = mpvue.getStorageSync("userInfo");
-          userInfo.city = vm.userInfo.city;
-          userInfo.teachingPoint = vm.userInfo.teachingPoint;
-          mpvue.setStorageSync("userInfo", userInfo);
-          mpvue.navigateTo({
-            url: "../../affirmInfo/two/main"
-          });
+          vm.affirmCorrection();
         }
       }
     },
     affirmCorrection() {
       let vm = this;
-      let userInfo = mpvue.getStorageSync("userInfo");
-      userInfo.city = vm.userInfo.city;
-      userInfo.teachingPoint = vm.userInfo.teachingPoint;
-      mpvue.setStorageSync("userInfo", userInfo);
-      mpvue.navigateTo({
-        url: "../../affirmInfo/two/main"
-      });
+      vm.$api.$signPost("学员确认信息", {
+          userid: mpvue.getStorageSync("userid")
+        })
+        .then(res => {
+          let userInfo = mpvue.getStorageSync("userInfo");
+          userInfo.Areas = vm.userInfo.Areas;
+          userInfo.teachingPoint = vm.userInfo.teachingPoint;
+          mpvue.setStorageSync("userInfo", userInfo);
+          mpvue.navigateTo({
+            url: "../../affirmInfo/two/main"
+          });
+        });
     }
   },
   onShow() {
