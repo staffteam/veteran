@@ -1,10 +1,10 @@
 <template>
-  <div :class="'select '+(isOpen?'on':'')">
+  <div class="select" :id="(isOpen?'on':'')">
     <div class="back" @click="cancel"></div>
-    <div :class="'select-main '+(isShow?'on':'')">
+    <div class="select-main" :id="(isShow?'on':'')">
       <div class="t">
         <p @click="cancel">取消</p>
-        <p @click="affirms()">确认</p>
+        <p @click="affirms">确认</p>
       </div>
       <div class="b">
         <picker-view
@@ -74,9 +74,8 @@ export default {
       this.$emit("input", false);
     },
     change(e) {
-      if (this.isOpen) {
-        this.$emit("change", e.mp.detail.value);
-      }
+      console.log(e.mp.detail.value);
+      this.$emit("change", e.mp.detail.value);
     }
   }
 };
@@ -90,7 +89,7 @@ export default {
   width: 100%;
   height: 100vh;
   display: none;
-  &.on {
+  &#on {
     display: block;
   }
   .back {
@@ -110,7 +109,7 @@ export default {
     position: absolute;
     z-index: 9;
     transition: 0.3s bottom;
-    &.on {
+    &#on {
       bottom: 0;
     }
     .t {
