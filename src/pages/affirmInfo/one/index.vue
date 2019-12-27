@@ -36,12 +36,22 @@
               :disabled="isReadonly"
               @click="openSelect"
             />
-            <single-select
-              v-model="isOpen"
-              :defaultVal="schoolValue"
-              @change="change"
-              :options="schoolData"
-            />
+            <single-picker
+              :isShowPicker="isOpen"
+              @sure="schoolSure"
+              @cancle="schoolCancle"
+              scrollType="normal"
+              :listData="[schoolData]"
+              :defaultPickData="schoolValue"
+              indicatorStyle="height:35px"
+              sureStyle="color:#e53330;font-size:30rpx;"
+              cancelStyle="color:#333333;font-size:30rpx;"
+              chooseItemTextStyle="color:#333333;font-size:30rpx;"
+              pickerHeaderStyle="border-bottom:1px solid #e5e5e5;"
+              titleStyle="display:none;"
+              cancelText="取消"
+              sureText="确定"
+            ></single-picker>
           </div>
         </div>
         <div class="submit-btn">
@@ -76,17 +86,24 @@ export default {
       schoolJson: {},
       schoolValue: [0],
       schoolData: [],
-      isOpen: false,
+      isOpen: false
     };
   },
   methods: {
-    openSelect(){
-      this.isOpen = true;
+    openSelect() {
+      if(!this.isReadonly){
+        this.isOpen = true;
+      }
     },
-    change(val) {
-      this.schoolValue = val;
-      this.userInfo.SchoolName = this.schoolData[val[0]];
-      this.userInfo.SchoolId = this.schoolJson[this.schoolData[val[0]]];
+    schoolSure(val) {
+      debugger;
+      this.isOpen = false;
+      // this.schoolValue = val;
+      // this.userInfo.SchoolName = this.schoolData[val[0]];
+      // this.userInfo.SchoolId = this.schoolJson[this.schoolData[val[0]]];
+    },
+    schoolCancle(){
+      this.isOpen = false;
     },
     /**
      * 城市选择确认

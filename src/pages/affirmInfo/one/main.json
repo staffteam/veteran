@@ -1,7 +1,8 @@
 {
     "navigationBarTitleText": "确认信息",
     "usingComponents": {
-      "city-picker": "../../../static/city-picker/city-picker"
+      "city-picker": "../../../static/city-picker/city-picker",
+      "single-picker":"../../../static/single-picker/picker"
     }
   }
   
