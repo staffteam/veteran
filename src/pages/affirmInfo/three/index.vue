@@ -14,7 +14,7 @@
             <span>中队编号</span>
             <input
               type="text"
-              v-model="userInfo.squadronNum"
+              v-model="userInfo.SquadNo"
               placeholder-style="color:#e53330;"
               :disabled="isReadonly"
             />

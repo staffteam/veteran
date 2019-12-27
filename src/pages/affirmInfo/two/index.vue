@@ -14,7 +14,7 @@
             <span>姓&emsp;&emsp;名</span>
             <input
               type="text"
-              v-model="userInfo.name"
+              v-model="userInfo.Name"
               placeholder-style="color:#e53330;"
               :disabled="isReadonly"
             />
@@ -32,7 +32,7 @@
             <span>手&emsp;&emsp;机</span>
             <input
               type="text"
-              v-model="userInfo.phone"
+              v-model="userInfo.Phone"
               placeholder-style="color:#e53330;"
               :disabled="isReadonly"
             />
@@ -80,23 +80,23 @@ export default {
       if (this.isReadonly) {
         this.isReadonly = false;
         this.hostInfo = {
-          name: this.userInfo.name,
+          Name: this.userInfo.Name,
           identityCard: this.userInfo.identityCard,
-          phone: this.userInfo.phone
+          Phone: this.userInfo.Phone
         };
-        this.userInfo.name = "";
+        this.userInfo.Name = "";
         this.userInfo.identityCard = "";
-        this.userInfo.phone = "";
+        this.userInfo.Phone = "";
       } else {
         this.isReadonly = true;
-        this.userInfo.name = this.hostInfo.name;
+        this.userInfo.Name = this.hostInfo.Name;
         this.userInfo.identityCard = this.hostInfo.identityCard;
-        this.userInfo.phone = this.hostInfo.phone;
+        this.userInfo.Phone = this.hostInfo.Phone;
       }
     },
     gonext() {
       let vm = this;
-      if (vm.userInfo.name == "") {
+      if (vm.userInfo.Name == "") {
         vm.showHint("请输入姓名");
       } else if (vm.userInfo.identityCard == "") {
         vm.showHint("请输入身份证");
@@ -108,18 +108,18 @@ export default {
         !/^\d{8}|^[a-zA-Z0-9]{10}|^\d{18}$/.test(vm.userInfo.identityCard)
       ) {
         vm.showHint("身份证格式有误");
-      } else if (vm.userInfo.phone == "") {
+      } else if (vm.userInfo.Phone == "") {
         vm.showHint("请输入手机号");
-      } else if (!/^1[3456789]\d{9}$/.test(vm.userInfo.phone)) {
+      } else if (!/^1[3456789]\d{9}$/.test(vm.userInfo.Phone)) {
         vm.showHint("手机号格式有误");
       } else {
         if (!this.isReadonly) {
           this.errorCorrection = true;
         } else {
           let userInfo = mpvue.getStorageSync("userInfo");
-          userInfo.name = this.userInfo.name;
+          userInfo.Name = this.userInfo.Name;
           userInfo.identityCard = this.userInfo.identityCard;
-          userInfo.phone = this.userInfo.phone;
+          userInfo.Phone = this.userInfo.Phone;
           mpvue.setStorageSync("userInfo", userInfo);
           mpvue.navigateTo({
             url: "../../affirmInfo/three/main"
@@ -130,9 +130,9 @@ export default {
     affirmCorrection() {
       let vm = this;
       let userInfo = mpvue.getStorageSync("userInfo");
-      userInfo.name = this.userInfo.name;
+      userInfo.Name = this.userInfo.Name;
       userInfo.identityCard = this.userInfo.identityCard;
-      userInfo.phone = this.userInfo.phone;
+      userInfo.Phone = this.userInfo.Phone;
       mpvue.setStorageSync("userInfo", userInfo);
       mpvue.navigateTo({
         url: "../../affirmInfo/three/main"

@@ -17,15 +17,30 @@
               v-model="userInfo.Areas"
               placeholder-style="color:#e53330;"
               :disabled="isReadonly"
+              @click="showCityPicker"
+            />
+            <city-picker
+              id="city-picker"
+              :value="cityPickerValue"
+              :isShow="cityPickerIsShow"
+              @sureclick="cityPickerOnSureClick"
+              @cancelclick="cityPickerOnCancelClick"
             />
           </div>
           <div class="item">
             <span>教&ensp;学&ensp;点</span>
             <input
               type="text"
-              v-model="userInfo.teachingPoint"
+              v-model="userInfo.SchoolName"
               placeholder-style="color:#e53330;"
               :disabled="isReadonly"
+              @click="openSelect"
+            />
+            <single-select
+              v-model="isOpen"
+              :defaultVal="schoolValue"
+              @change="change"
+              :options="schoolData"
             />
           </div>
         </div>
@@ -39,7 +54,7 @@
       <i class="iconfont icon-dui"></i>
       <h2>提交成功</h2>
       <div>工作人员将会在3个工作日内审核您的申请，敬请留意</div>
-      <p @click="affirmCorrection">知道了</p>
+      <p @click="affirmCorrection(true)">知道了</p>
     </div>
     <hint :commonMsg="commonMsg" :title="commonTitle" />
   </div>
@@ -54,10 +69,45 @@ export default {
       userInfo: {},
       hostInfo: {},
       isReadonly: true,
-      errorCorrection: false
+      errorCorrection: false,
+      cityPickerValue: [0, 0],
+      cityPickerIsShow: false,
+      schoolList: [],
+      schoolJson: {},
+      schoolValue: [0],
+      schoolData: [],
+      isOpen: false,
     };
   },
   methods: {
+    openSelect(){
+      this.isOpen = true;
+    },
+    change(val) {
+      this.schoolValue = val;
+      this.userInfo.SchoolName = this.schoolData[val[0]];
+      this.userInfo.SchoolId = this.schoolJson[this.schoolData[val[0]]];
+    },
+    /**
+     * 城市选择确认
+     */
+    cityPickerOnSureClick: function(e) {
+      let _data = e.mp.detail;
+      this.userInfo.Areas = _data.valueName[0] + _data.valueName[1];
+      this.cityPickerValue = _data.valueCode;
+      this.cityPickerIsShow = false;
+    },
+    /**
+     * 城市选择取消
+     */
+    cityPickerOnCancelClick: function(event) {
+      this.cityPickerIsShow = false;
+    },
+    showCityPicker() {
+      if (!this.isReadonly) {
+        this.cityPickerIsShow = true;
+      }
+    },
     showHint(text, time = 1000) {
       let vm = this;
       vm.commonMsg = true;
@@ -72,44 +122,62 @@ export default {
         this.isReadonly = false;
         this.hostInfo = {
           Areas: this.userInfo.Areas,
-          teachingPoint: this.userInfo.teachingPoint
+          SchoolName: this.userInfo.SchoolName
         };
         this.userInfo.Areas = "";
-        this.userInfo.teachingPoint = "";
+        this.userInfo.SchoolName = "";
       } else {
         this.isReadonly = true;
         this.userInfo.Areas = this.hostInfo.Areas;
-        this.userInfo.teachingPoint = this.hostInfo.teachingPoint;
+        this.userInfo.SchoolName = this.hostInfo.SchoolName;
       }
     },
     gonext() {
       let vm = this;
+      let userInfo = mpvue.getStorageSync("userInfo");
       if (vm.userInfo.Areas == "") {
         vm.showHint("请输入地区");
-      } else if (vm.userInfo.teachingPoint == "") {
+      } else if (vm.userInfo.SchoolName == "") {
         vm.showHint("请输入教学点");
       } else {
         if (!this.isReadonly) {
+          vm.$api
+            .$signPost("纠错", {
+              Areas: vm.userInfo.Areas,
+              SchoolId: vm.userInfo.SchoolId
+            })
+            .then(res => {
+              userInfo.Areas = vm.userInfo.Areas;
+              userInfo.SchoolName = vm.userInfo.SchoolName;
+              userInfo.SchoolId = vm.userInfo.SchoolId;
+              mpvue.setStorageSync("userInfo", userInfo);
+              mpvue.navigateTo({
+                url: "../../affirmInfo/two/main"
+              });
+            });
           this.errorCorrection = true;
         } else {
           vm.affirmCorrection();
         }
       }
     },
-    affirmCorrection() {
+    affirmCorrection(is) {
       let vm = this;
-      vm.$api.$signPost("学员确认信息", {
-          userid: mpvue.getStorageSync("userid")
-        })
-        .then(res => {
-          let userInfo = mpvue.getStorageSync("userInfo");
-          userInfo.Areas = vm.userInfo.Areas;
-          userInfo.teachingPoint = vm.userInfo.teachingPoint;
-          mpvue.setStorageSync("userInfo", userInfo);
-          mpvue.navigateTo({
-            url: "../../affirmInfo/two/main"
-          });
+      if (is) {
+        mpvue.navigateTo({
+          url: "../../affirmInfo/two/main"
         });
+      } else {
+        vm.$api
+          .$signPost("学员确认信息", {
+            userid: vm.userInfo.userid
+          })
+          .then(res => {
+            mpvue.navigateTo({
+              url: "../../affirmInfo/two/main"
+            });
+          });
+      }
     }
   },
   onShow() {
@@ -121,10 +189,38 @@ export default {
         timingFunc: "easeIn"
       }
     });
+    let vm = this;
     let userInfo = mpvue.getStorageSync("userInfo");
     if (userInfo) {
       this.userInfo = userInfo;
     }
+    this.$api.$signGet("教学点列表", {}).then(res => {
+      if (res.Success) {
+        vm.schoolList = [
+          ...res.Data,
+          {
+            CreateTime: "2019-12-20 17:13:35",
+            EnCode: "school",
+            Id: "1207947833622138881",
+            Image: null,
+            IsTree: null,
+            Name: "坂田教学点2",
+            ParentId: null,
+            SortNo: 0,
+            UpdateTime: null
+          }
+        ];
+        let _arr = [],
+          _arr2 = {};
+        vm.schoolList.forEach(value => {
+          _arr.push(value.Name);
+          _arr2[value.Name] = value.Id;
+        });
+        console.log(_arr);
+        this.schoolData = _arr;
+        this.schoolJson = _arr2;
+      }
+    });
   },
   onLoad() {
     let vm = this;

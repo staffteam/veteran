@@ -181,12 +181,11 @@ export default {
         vm.commonTitle = "";
       }, time);
     },
-    getInfos(userid) {
+    getInfos(obj) {
       let vm = this;
       this.$api
-        .$signGet("根据手机号获取学员信息", {
-          phone: vm.form.phone,
-          userid: userid
+        .$signGet("根据学生Id获取信息", {
+          userid: obj.Id
         })
         .then(res => {
           if (res.Success) {
@@ -194,7 +193,8 @@ export default {
             mpvue.setStorageSync("userInfo", {
               ...userInfo,
               ...res.Data,
-              userid: userid,
+              userid: obj.Id,
+              user_status:obj.Status,
               wx_avatarUrl: userInfo.avatarUrl,
               wx_city: userInfo.city
             });

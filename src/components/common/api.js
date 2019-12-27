@@ -9,7 +9,8 @@ const path = {
   '用户反馈': `${api}/Member/SubmitMessage`,
   '教学点列表': `${api}/Member/GetSchoolList`,
   '课程详情': `${api}/Course/GetVedioCourseDetail`,
-  '登陆':`${api}/Member/Login`
+  '登陆':`${api}/Member/Login`,
+  '根据学生Id获取信息':`${api}/Member/GetInfoById`
 };
 const load = {
   show() {

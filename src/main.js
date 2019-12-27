@@ -8,6 +8,8 @@ import hint from './components/hint/hint'
 Vue.component('hint', hint);
 import loadData from './components/loadData'
 Vue.component('load-data', loadData);
+import select from './components/select/select'
+Vue.component('single-select', select);
 
 import common from './components/common/common';
 Vue.prototype.$common = common;
