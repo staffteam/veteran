@@ -1,16 +1,16 @@
 <template>
   <div class="course-play-back">
     <ul>
-      <li v-for="item in courseData" :key="item.id">
-        <a :href="'../../course/detail/main?id='+item.id">
+      <li v-for="item in courseData" :key="item.Id">
+        <a :href="'../../course/detail/main?id='+item.Id">
           <p>
-            <img :src="item.img_url" mode="widthFix" />
+            <img :src="item.Image" mode="aspectFill" />
           </p>
           <div>
-            <h2 class="lines">{{item.title}}</h2>
+            <h2 class="lines">{{item.Title}}</h2>
             <div>
-              <span>{{item.time}}</span>
-              <p :class="!item.clockIn?'on':''">{{item.clockIn?'已打卡':'未打卡'}}</p>
+              <span>{{item.ActiveTime}}</span>
+              <p :class="!item.IsSignIn?'on':''">{{item.IsSignIn?'已打卡':'未打卡'}}</p>
             </div>
           </div>
         </a>
@@ -29,36 +29,7 @@ export default {
       isGet: true,
       pageNum: 1,
       pageSize: 10,
-      courseData: [
-        {
-          img_url: "/static/images/course.jpg",
-          title: "退役军人培训课程退役军人培训课程退役军人",
-          time: "2019-06-01",
-          clockIn: false,
-          id: 0
-        },
-        {
-          img_url: "/static/images/course.jpg",
-          title: "退役军人培训课程退役军人培训课程退役军人",
-          time: "2019-06-01",
-          clockIn: false,
-          id: 1
-        },
-        {
-          img_url: "/static/images/course.jpg",
-          title: "退役军人培训课程退役军人培训课程退役军人",
-          time: "2019-06-01",
-          clockIn: true,
-          id: 2
-        },
-        {
-          img_url: "/static/images/course.jpg",
-          title: "退役军人培训课程退役军人培训课程退役军人",
-          time: "2019-06-01",
-          clockIn: true,
-          id: 3
-        }
-      ]
+      courseData: []
     };
   },
   /**
@@ -76,11 +47,25 @@ export default {
       let vm = this;
       vm.isGet = false;
       vm.isLoading = true;
-      setTimeout(_ => {
-        vm.isGet = false;
-        vm.isLoading = false;
-        vm.isNotData = true;
-      }, 1000);
+      this.$api
+        .$signGet("视频课程列表", {
+          userid: mpvue.getStorageSync("userid"),
+          page: vm.pageNum
+        })
+        .then(res => {
+          if (res.Data.rows.length > 0) {
+            vm.isGet = true;
+            vm.isLoading = false;
+            vm.courseData = res.Data.rows.map(value=>{
+              value.ActiveTime = value.ActiveTime.split(' ')[0];
+              return value;
+            });
+          } else {
+            vm.isGet = false;
+            vm.isLoading = false;
+            vm.isNotData = true;
+          }
+        });
     }
   },
   onShow() {
@@ -117,6 +102,7 @@ export default {
           overflow: hidden;
           img {
             width: 100%;
+            height: 100%;
           }
         }
         & > div {
@@ -130,6 +116,8 @@ export default {
             span {
               font-size: 26rpx;
               color: #999;
+              display: block;
+              float:left;
             }
             p {
               float: right;

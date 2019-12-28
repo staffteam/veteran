@@ -91,7 +91,7 @@ export default {
         },
         {
           title: "在线试题",
-          url: "../testQuestions/main",
+          url: "../my/exam/main",
           icon: "/static/images/home-list4.png",
           isUser:true
         },

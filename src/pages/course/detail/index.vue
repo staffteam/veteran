@@ -1,6 +1,6 @@
 <template>
   <div class="course-detail">
-    <txv-video vid="e0354z3cqjp" playerid="txv1" width="100%" height="420rpx"></txv-video>
+    <txv-video :vid="detail.Content" playerid="txv1" width="100%" height="420rpx"></txv-video>
     <div class="course-sign">
       <h2>离签到还需要观看</h2>
       <p>
@@ -12,20 +12,20 @@
       </p>
       <span
         @click="courseSign()"
-        :class="(isAllowSign?'on':'')+' '+(isSign?'off':'')"
-      >{{isSign?'已签到':'签到'}}</span>
+        :class="(isAllowSign?'on':'')+' '+(detail.IsSignIn?'off':'')"
+      >{{detail.IsSignIn?'已签到':'签到'}}</span>
     </div>
     <div class="course-title">
-      <h2 class="lines">{{detail.title}}</h2>
+      <h2 class="lines">{{detail.Title}}</h2>
       <div>
-        <p>{{detail.time}}</p>
-        <span>阅读 {{detail.flow}}</span>
+        <p>{{detail.ActiveTime}}</p>
+        <span>阅读 {{detail.Stat}}</span>
       </div>
     </div>
     <div class="course-sign-num">
       <h2>
         已签到
-        <span>{{detail.signNum}}</span>人
+        <span>{{detail.SignInTotal}}</span>人
       </h2>
       <p></p>
     </div>
@@ -35,10 +35,10 @@
       <scroll-view scroll-y="true" class="user-list">
         <ul>
           <li
-            v-for="item in signUserData"
-            :key="item.id"
-            :class="item.id == userInfo.id?'on':''"
-          >{{item.name}}</li>
+            v-for="item in detail.SignInList"
+            :key="item.StudentId"
+            :class="item.StudentId == userInfo.userid?'on':''"
+          >{{item.Name}}</li>
         </ul>
       </scroll-view>
     </div>
@@ -52,72 +52,64 @@ export default {
       countDown: {
         h: "00",
         m: "00",
-        s: "05"
+        s: "00"
       },
-      detail: {
-        title: "退役军人培训课程退役军人培训课程退役军人",
-        time: "2019-06-01",
-        flow: "206",
-        signNum: "10"
-      },
+      detail: {},
       isAllowSign: false,
       isSign: false,
-      userInfo: {
-        id: "11",
-        name: "伏羲"
-      },
-      signUserData: [
-        {
-          name: "隔壁老王",
-          id: "1"
-        },
-        {
-          name: "老李",
-          id: "2"
-        },
-        {
-          name: "老张",
-          id: "3"
-        },
-        {
-          name: "老赵",
-          id: "4"
-        },
-        {
-          name: "西门庆",
-          id: "5"
-        },
-        {
-          name: "东北虎",
-          id: "6"
-        },
-        {
-          name: "西门吹雪",
-          id: "7"
-        },
-        {
-          name: "聂风",
-          id: "8"
-        },
-        {
-          name: "步惊云",
-          id: "9"
-        },
-        {
-          name: "齐天大圣",
-          id: "10"
-        }
-      ]
+      userInfo: {},
+      pid: ""
     };
   },
   methods: {
     courseSign() {
       let vm = this;
-      if (vm.isAllowSign && !vm.isSign) {
-        vm.isSign = true;
-        vm.signUserData.push({ name: vm.userInfo.name, id: vm.userInfo.id });
-        vm.detail.signNum = vm.signUserData.length;
+      if (vm.isAllowSign && !vm.detail.IsSignIn) {
+        vm.$api
+          .$signPost("视频课程签到", {
+            id: vm.pid,
+            userid: mpvue.getStorageSync("userid")
+          })
+          .then(res => {
+            mpvue.showToast({
+              title: "签到成功",
+              icon: "success"
+            });
+            vm.IsSignIn = true;
+            vm.detail.SignInList.push({
+              Name: vm.userInfo.Name,
+              StudentId: vm.userInfo.userid
+            });
+            vm.detail.SignInTotal = vm.detail.SignInList.length;
+          });
       }
+    },
+    startCountDown() {
+      let vm = this;
+      let timeObj = setInterval(_ => {
+        let { h, m, s } = vm.countDown;
+        if (s == 0) {
+          //减少一分钟
+          if (m == 0 && h != 0) {
+            //大于等于一小时 减少一小时
+            vm.countDown.h = +h - 1 > 9 ? +h - 1 : "0" + (+h - 1);
+            vm.countDown.m = "59";
+            vm.countDown.s = "59";
+          } else if (m != 0) {
+            //大于等于一分钟 减少一分钟
+            vm.countDown.m = +m - 1 > 9 ? +m - 1 : "0" + (+m - 1);
+            vm.countDown.s = "59";
+          }
+        } else {
+          if (h == 0 && m == 0 && s == 1) {
+            //小于一小时 倒计时结束
+            vm.countDown.s == 0;
+            vm.isAllowSign = true;
+            clearInterval(timeObj);
+          }
+          vm.countDown.s = +s - 1 > 9 ? +s - 1 : "0" + (+s - 1);
+        }
+      }, 1000);
     }
   },
   onShow() {
@@ -129,34 +121,28 @@ export default {
         timingFunc: "easeIn"
       }
     });
-    let vm = this;
-    let timeObj = setInterval(_ => {
-      let { h, m, s } = vm.countDown;
-      if (s == 0) {
-        //减少一分钟
-        if (m == 0 && h != 0) {
-          //大于等于一小时 减少一小时
-          vm.countDown.h = +h - 1 > 9 ? +h - 1 : "0" + (+h - 1);
-          vm.countDown.m = "59";
-          vm.countDown.s = "59";
-        } else if (m != 0) {
-          //大于等于一分钟 减少一分钟
-          vm.countDown.m = +m - 1 > 9 ? +m - 1 : "0" + (+m - 1);
-          vm.countDown.s = "59";
-        }
-      } else {
-        if (h == 0 && m == 0 && s == 1) {
-          //小于一小时 倒计时结束
-          vm.countDown.s == 0;
-          vm.isAllowSign = true;
-          clearInterval(timeObj);
-        }
-        vm.countDown.s = +s - 1 > 9 ? +s - 1 : "0" + (+s - 1);
-      }
-    }, 1000);
   },
-  onLoad() {
+  onLoad(o) {
     let vm = this;
+    vm.pid = o.id;
+    vm.userInfo = mpvue.getStorageSync("userInfo");
+    vm.$api
+      .$signGet("视频课程详情", {
+        id: o.id,
+        userid: mpvue.getStorageSync("userid")
+      })
+      .then(res => {
+        if (res.Data.IsSignIn) {
+          vm.isAllowSign = true;
+        } else {
+          let _arr = res.Data.SignInTime.split(":");
+          vm.countDown.h = _arr[0];
+          vm.countDown.m = _arr[1];
+          vm.countDown.s = _arr[2];
+          vm.startCountDown();
+        }
+        vm.detail = res.Data;
+      });
   }
 };
 </script>

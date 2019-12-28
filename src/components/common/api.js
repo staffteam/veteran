@@ -8,19 +8,23 @@ const path = {
   '学员确认信息': `${api}/Member/InfoConfirm`,
   '用户反馈': `${api}/Member/SubmitMessage`,
   '教学点列表': `${api}/Member/GetSchoolList`,
-  '课程详情': `${api}/Course/GetVedioCourseDetail`,
   '登陆': `${api}/Member/Login`,
   '根据学生Id获取信息': `${api}/Member/GetInfoById`,
   '根据日期获取签到状态': `${api}/Course/GetSignInDateList`,
   '根据日期获取课程': `${api}/Course/GetCourseListByDate`,
-  '课程详情': `${api}/Course/GetCourseDetail`,
+  '学员课程详情': `${api}/Course/GetCourseDetail`,
   '老师查看课程': `${api}/Course/GetCourseSignInDetail`,
   '老师查看课程签到列表': `${api}/Course/GetSignInList`,
   '学生签到': `${api}/Course/CourseSignIn`,
   '老师确认签到': `${api}/Course/ConfirmSignIn`,
   '老师一键确认签到': `${api}/Course/ConfirmSignInAll`,
   '满意度调查': `${api}/Questionnaire/GetQuestionnaireDetail`,
-  '问卷提交': `${api}/Questionnaire/SubmitQuestionnaire`
+  '问卷提交': `${api}/Questionnaire/SubmitQuestionnaire`,
+  '视频课程列表': `${api}/Course/GetVedioCourceList`,
+  '视频课程详情': `${api}/Course/GetVedioCourseDetail`,
+  '视频课程签到': `${api}/Course/VedioCourseSignIn`,
+  '科目列表': `${api}/Exam/GetSubjectList`,
+  '科目详情': `${api}/Exam/GetSubjectDetail`
 };
 const load = {
   show() {

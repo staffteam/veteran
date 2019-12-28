@@ -38,6 +38,7 @@ export default {
             vertical-align: middle;
         }
         font-size:26rpx;
+        line-height: 30rpx;
         color: #999;
     }
     .null-data-text{

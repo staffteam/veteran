@@ -157,7 +157,16 @@ export default {
     // 下课签到
     endSign() {
       if (this.signScope) {
-        this.SignOutStatus = true;
+        vm.$api.$signPost('学生签到',{
+          id:vm.info.id,
+          userid:mpvue.getStorageSync("userid")
+        }).then(res=>{
+          mpvue.showToast({
+            title: "签到成功！",
+            icon: "success"
+          });
+          vm.SignOutStatus = true;
+        })
       } else {
         this.commonMsg = true;
         setTimeout(_ => {
@@ -322,7 +331,7 @@ export default {
   onLoad(o) {
     let vm = this;
     this.$api
-      .$signGet("课程详情", {
+      .$signGet("学员课程详情", {
         id: o.id,
         userid: mpvue.getStorageSync("userid")
       })
