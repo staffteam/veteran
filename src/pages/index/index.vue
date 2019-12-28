@@ -5,14 +5,16 @@
         <img src="/static/images/home-back.jpg" mode="widthFix" />
       </p>
       <ul>
-        <li v-for="(item,index) in homeNavData" :key="index">
-          <a :href="item.url">
-            <p>
-              <img :src="item.icon" mode="widthFix" />
-            </p>
-            <h2>{{item.title}}</h2>
-          </a>
-        </li>
+        <template  v-for="(item,index) in homeNavData" >
+          <li :key="index" v-if="((item.isTeacher && isAdmin) || !item.isTeacher) && ((item.isUser && !isAdmin) || !item.isUser)">
+            <a :href="item.url" >
+              <p>
+                <img :src="item.icon" mode="widthFix" />
+              </p>
+              <h2>{{item.title}}</h2>
+            </a>
+          </li>
+        </template>
       </ul>
     </div>
     <div class="login" v-if="isLogin=='1'">
@@ -90,7 +92,8 @@ export default {
         {
           title: "在线试题",
           url: "../testQuestions/main",
-          icon: "/static/images/home-list4.png"
+          icon: "/static/images/home-list4.png",
+          isUser:true
         },
         {
           title: "上课签到",
@@ -101,6 +104,12 @@ export default {
           title: "文体娱乐",
           url: "../entertainment/list/main",
           icon: "/static/images/home-list6.png"
+        },
+        {
+          title: "学员查询",
+          url: "../student/query/main",
+          icon: "/static/images/home-list15.png",
+          isTeacher:true
         },
         {
           title: "结业典礼",
@@ -138,16 +147,12 @@ export default {
           icon: "/static/images/home-list13.png"
         },
         {
-          title: "学员查询",
-          url: "../student/query/main",
-          icon: "/static/images/home-list15.png"
-        },
-        {
           title: "敬请期待",
           url: "",
           icon: "/static/images/home-list14.png"
         }
       ],
+      isAdmin:false,
       hasUserInfo: false,
       canIUse: wx.canIUse("button.open-type.getUserInfo"),
       isLogin: "-1",
@@ -323,6 +328,7 @@ export default {
     let oneLogin = mpvue.getStorageSync("oneLogin");
     let userInfo = mpvue.getStorageSync("userInfo");
     let userid = mpvue.getStorageSync("userid");
+    this.isAdmin = userInfo.IsTeacher;
     //没有认证但登录了，跳转至认证模块
     if (!userid && userInfo && userInfo.userid && oneLogin != "1") {
       mpvue.redirectTo({

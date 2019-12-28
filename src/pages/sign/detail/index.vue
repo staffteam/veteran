@@ -19,11 +19,11 @@
         </h2>
         <div>
           <h2>进场时间 {{startSignTime}}</h2>
-          <p :class="isStartSign?'on':''">{{isStartSign?"已签到":"未签到"}}</p>
+          <p :class="SignInStatus?'on':''">{{SignInStatus?"已签到":"未签到"}}</p>
         </div>
         <div>
           <h2>退场时间 {{endSignTime}}</h2>
-          <p :class="isEndSign?'on':''">{{isEndSign?"已签到":"未签到"}}</p>
+          <p :class="SignOutStatus?'on':''">{{SignOutStatus?"已签到":"未签到"}}</p>
         </div>
       </div>
       <div class="sign">
@@ -37,7 +37,7 @@
           </div>
           <!-- 上课未签到，且没有迟到，且已到可以上课签到时间 -->
           <div
-            v-if="!isStartSign && !isStartbeLate && allowStartSign"
+            v-if="!SignInStatus && !isStartbeLate && allowStartSign"
             :class="signScope?'on':'off'"
             @click="startSign()"
           >
@@ -47,7 +47,7 @@
           </div>
           <!-- 上课未签到，且已经迟到，且已到可以上课签到时间，且没有到下课时间 -->
           <div
-            v-if="!isStartSign && isStartbeLate && !isEndLeave"
+            v-if="!SignInStatus && isStartbeLate && !isEndLeave"
             :class="signScope?'on warn':'off'"
             @click="startSign()"
           >
@@ -56,15 +56,15 @@
             </p>
           </div>
           <!-- 上课已签到，未到下课签到时间（早退时间段） -->
-          <div v-if="isStartSign && !isEndLeave" class="off">
+          <div v-if="SignInStatus && !isEndLeave" class="off">
             <p>
               <span>距下次签到</span>
               <span>{{endCountDown}}</span>
             </p>
           </div>
-          <!-- 下课未签到，且已到下课签到时间，且上课已签到 -->
+          <!-- 下课未签到，且已到下课签到时间，未超过下课可以打卡时间，且上课已签到 -->
           <div
-            v-if="!isEndSign && isEndLeave && isStartSign"
+            v-if="!SignOutStatus && isEndLeave && !isEndLeaveOut && SignInStatus"
             :class="signScope?'on':'off'"
             @click="endSign()"
           >
@@ -73,13 +73,13 @@
             </p>
           </div>
           <!-- 上课已签到，下课已签到 -->
-          <div v-if="isStartSign && isEndSign" class="off">
+          <div v-if="SignInStatus && SignOutStatus" class="off">
             <p>
               <font>签到完成</font>
             </p>
           </div>
-          <!-- 上课未签到，下课未签到，且已到下课时间 -->
-          <div v-if="!isStartSign && !isEndSign && isEndLeave" class="off">
+          <!-- 上课未签到，下课未签到，且已到下课时间，且已超过下课可以打卡时间 -->
+          <div v-if="(!SignInStatus || !SignOutStatus) && isEndLeave && isEndLeaveOut" class="off">
             <p>
               <font>缺勤</font>
             </p>
@@ -112,40 +112,52 @@ export default {
       info: {
         title: "",
         teacher: "",
-        locate: ""
+        locate: "",
+        id:""
       },
       allowStartSign: false,
       startCountDown: "加载中···",
       endCountDown: "加载中···",
-      isStartSign: false,
+      SignInStatus: false,
       isStartbeLate: false,
       isEndLeave: false,
-      isEndSign: false,
+      SignOutStatus: false,
       allowEndSign: false,
       startSignTime: "加载中···",
       endSignTime: "加载中···",
       locateContent: "定位中···",
       qqmapsdk: "",
       signScope: false,
-      commonMsg: false
+      commonMsg: false,
+      isEndLeaveOut:false
     };
   },
   methods: {
     // 上课签到
     startSign() {
-      if (this.signScope) {
-        this.isStartSign = true;
+      let vm = this;
+      if (vm.signScope) {
+        vm.$api.$signPost('学生签到',{
+          id:vm.info.id,
+          userid:mpvue.getStorageSync("userid")
+        }).then(res=>{
+          mpvue.showToast({
+            title: "签到成功！",
+            icon: "success"
+          });
+          vm.SignInStatus = true;
+        })
       } else {
-        this.commonMsg = true;
+        vm.commonMsg = true;
         setTimeout(_ => {
-          this.commonMsg = false;
+          vm.commonMsg = false;
         }, 2000);
       }
     },
     // 下课签到
     endSign() {
       if (this.signScope) {
-        this.isEndSign = true;
+        this.SignOutStatus = true;
       } else {
         this.commonMsg = true;
         setTimeout(_ => {
@@ -153,34 +165,25 @@ export default {
         }, 2000);
       }
     },
-    getSignInfo() {
+    getSignInfo(data) {
       let vm = this;
-      let data = {
-        start_time: "23:45",
-        end_time: "23:59",
-        isStartSign: false,
-        isEndSign: false,
-        locate: "shenz 湖南省政府",
-        title:
-          "信息办与基础工作安排培训课程工作安排培训课程工作安排培训课程工作安排培训课程工作安排培训",
-        teacher: "刘毅"
-      };
-      this.isStartSign = data.isStartSign;
-      this.isEndSign = data.isEndSign;
+      this.SignInStatus = data.SignInStatus;
+      this.SignOutStatus = data.SignOutStatus;
       this.info = {
-        title: data.title,
-        teacher: data.teacher,
-        locate: data.locate
+        title: data.Title,
+        teacher: data.TeacherName,
+        locate: data.Address,
+        id:data.Id
       };
       let start_h = "";
       let end_h = "";
       let start_m = "";
       let end_m = "";
-      if (data.start_time && data.end_time) {
-        start_h = data.start_time.split(":")[0];
-        start_m = data.start_time.split(":")[1];
-        end_h = data.end_time.split(":")[0];
-        end_m = data.end_time.split(":")[1];
+      if (data.SignInTime && data.SignOutTime) {
+        start_h = data.SignInTime.split(":")[0];
+        start_m = data.SignInTime.split(":")[1];
+        end_h = data.SignOutTime.split(":")[0];
+        end_m = data.SignOutTime.split(":")[1];
         if (+start_h > 12) {
           this.startSignTime = `下午${+start_h - 12}:${start_m}`;
         } else {
@@ -192,38 +195,44 @@ export default {
           this.endSignTime = `上午${end_h}:${end_m}`;
         }
         let date = new Date();
-        let start_time = new Date(
-          `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()} ${
-            data.start_time
-          }:00`
+        let signTime = new Date(data.StartTime);
+        let SignInTime = new Date(
+          `${signTime.getFullYear()}/${signTime.getMonth() +
+            1}/${signTime.getDate()} ${data.SignInTime}:00`
         );
-        let end_time = new Date(
-          `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()} ${
-            data.end_time
-          }:00`
+        let SignOutTime = new Date(
+          `${signTime.getFullYear()}/${signTime.getMonth() +
+            1}/${signTime.getDate()} ${data.SignOutTime}:00`
         );
+        let _outTime = data.ReservedTime * 60 * 1000;
         //判断是否已到上课签到时间 条件：当前时间小于等于上课时间，且时间间隔不大于一小时
-        this.allowStartSign = start_time.getTime() - date.getTime() <= 86400000;
+        this.allowStartSign = SignInTime.getTime() - date.getTime() <= _outTime;
         //计算当前时间与上课时间的时间差
-        this.getStartCountDown(start_time);
+        this.getStartCountDown(SignInTime, _outTime);
         setInterval(_ => {
-          vm.getStartCountDown(start_time);
+          vm.getStartCountDown(SignInTime, _outTime);
         }, 1000);
         //判断是否迟到
-        this.isStartbeLate = start_time.getTime() - date.getTime() <= 0;
-        //计算当前时间与下课时间的时间差
-        this.getEndCountDown(end_time);
-        setInterval(_ => {
-          vm.getEndCountDown(end_time);
-        }, 1000);
+        this.isStartbeLate = SignInTime.getTime() - date.getTime() < -_outTime;
         //判断是否已到下课时间
-        this.isEndLeave = end_time.getTime() - date.getTime() <= 0;
+        this.isEndLeave = SignOutTime.getTime() - date.getTime() <= _outTime;
+        //计算当前时间与下课时间的时间差
+        this.getEndCountDown(SignOutTime, _outTime);
+        setInterval(_ => {
+          vm.getEndCountDown(SignOutTime, _outTime);
+        }, 1000);
+        //判断是否已超过下课时间范围
+        this.isEndLeaveOut = SignOutTime.getTime() - date.getTime() < -_outTime;
+        //获取定位
+        this.getLocate();
       }
     },
-    getStartCountDown(start_time) {
+    getStartCountDown(SignInTime, _outTime) {
       let date = new Date();
-      let diff = start_time.getTime() - date.getTime();
-      if (diff <= 86400000) {
+      let diff = SignInTime.getTime() - date.getTime();
+      if (diff > _outTime) {
+        //当前时间小于上课时间，且没有到可以上课打卡的时间范围
+        diff = diff-_outTime;
         let hours = Math.floor(diff / (3600 * 1000)); //计算出小时数
         let leave2 = hours % (3600 * 1000); //计算小时数后剩余的毫秒数
         let minutes = Math.floor(leave2 / (60 * 1000)); //计算相差分钟数
@@ -233,13 +242,24 @@ export default {
           minutes < 10 ? "0" + minutes : minutes
         }:${seconds < 10 ? "0" + seconds : seconds}`;
       } else {
-        this.allowStartSign = true;
+        if (diff <= _outTime && diff >= 0) {
+          //当前时间小于等于上课时间，但已经在能打卡范围
+          this.allowStartSign = true;
+        } else if (diff < 0 && diff >= -_outTime) {
+          //当前时间大于上课时间，但未超过上课打卡时间范围
+          this.allowStartSign = true;
+        } else if (diff < -_outTime) {
+          //当前时间大于上课时间，且已经超过上课打卡时间范围，已迟到
+          this.isStartbeLate = true;
+        }
       }
     },
-    getEndCountDown(end_time) {
+    getEndCountDown(SignOutTime, _outTime) {
       let date = new Date();
-      let diff = end_time.getTime() - date.getTime();
-      if (diff >= 0) {
+      let diff = SignOutTime.getTime() - date.getTime();
+      if (diff > _outTime) {
+        diff = diff-_outTime;
+        //当前时间小于下课时间，且没有在下课可打卡的时间范围
         let hours = Math.floor(diff / (3600 * 1000)); //计算出小时数
         let leave2 = diff % (3600 * 1000); //计算小时数后剩余的毫秒数
         let minutes = Math.floor(leave2 / (60 * 1000)); //计算相差分钟数
@@ -249,7 +269,16 @@ export default {
           minutes < 10 ? "0" + minutes : minutes
         }:${seconds < 10 ? "0" + seconds : seconds}`;
       } else {
-        this.isEndLeave = true;
+        if (diff <= _outTime && diff >= 0) {
+          //当前时间小于下课时间，且已经可以下课打卡
+          this.isEndLeave = true;
+        } else if (diff < 0 && diff >= -_outTime) {
+          //当前时间小于下课时间，且可以下课打卡
+          this.isEndLeave = true;
+        } else if (diff < -_outTime) {
+          //当前时间大于下课时间，且已经不能打卡
+          this.isEndLeaveOut = true;
+        }
       }
     },
     getLocate() {
@@ -269,10 +298,7 @@ export default {
             },
             success: function(data) {
               mpvue.hideLoading();
-              vm.locateContent =
-                data.result.ad_info.city +
-                " " +
-                data.result.formatted_addresses.recommend;
+              vm.locateContent = data.result.address;
               vm.signScope = vm.info.locate == vm.locateContent;
             }
           });
@@ -289,14 +315,21 @@ export default {
         timingFunc: "easeIn"
       }
     });
-    this.getSignInfo();
     this.qqmapsdk = new QQMapWX({
       key: "KSVBZ-FXYEO-YPOWF-SS2GK-UBMQ7-G5BXE"
     });
-    this.getLocate();
   },
-  onLoad() {
+  onLoad(o) {
     let vm = this;
+    this.$api
+      .$signGet("课程详情", {
+        id: o.id,
+        userid: mpvue.getStorageSync("userid")
+      })
+      .then(res => {
+        console.log(res.Data);
+        vm.getSignInfo(res.Data);
+      });
   }
 };
 </script>

@@ -119,12 +119,10 @@ export default {
           if (!this.isReadonly) {
             vm.$api
               .$signPost("纠错", {
-                args: {
-                  Name: vm.userInfo.Name,
-                  IdCard: vm.userInfo.IdCard,
-                  Phone: vm.userInfo.Phone,
-                  StudentId: vm.userInfo.userid
-                }
+                Name: vm.userInfo.Name,
+                IdCard: vm.userInfo.IdCard,
+                Phone: vm.userInfo.Phone,
+                StudentId: vm.userInfo.userid
               })
               .then(res => {
                 vm.errorCorrection = true;

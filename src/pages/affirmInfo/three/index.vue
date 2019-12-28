@@ -151,13 +151,11 @@ export default {
         if (!this.isReadonly) {
           vm.$api
             .$signPost("纠错", {
-              args: {
-                SquadronNo: vm.userInfo.SquadronNo,
-                SquadronCaptain: vm.userInfo.SquadronCaptain,
-                SquadCaptain: vm.userInfo.SquadCaptain,
-                EnlistEndTime: vm.userInfo.EnlistEndTime,
-                StudentId: vm.userInfo.userid
-              }
+              SquadronNo: vm.userInfo.SquadronNo,
+              SquadronCaptain: vm.userInfo.SquadronCaptain,
+              SquadCaptain: vm.userInfo.SquadCaptain,
+              EnlistEndTime: vm.userInfo.EnlistEndTime,
+              StudentId: vm.userInfo.userid
             })
             .then(res => {
               vm.errorCorrection = true;
