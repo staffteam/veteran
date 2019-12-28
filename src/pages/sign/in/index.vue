@@ -27,8 +27,8 @@
         <div
           v-for="item in endDay"
           :key="item.id"
-          :class="(theDay == item.num+1?'on':'')+' '+(thisDay == item.num+1?'the':'')"
-          @click="getTheDay(item.num+1)"
+          :class="(isSignInData[item.num+1]===undefined?'':isSignInData[item.num+1]?'already-sign':'not-sign')+' '+(staySignInData[item.num+1]?'the':'')+' '+(theDay == item.num+1?'on':'')"
+          @click="getTheDay(item.num+1,staySignInData[item.num+1])"
         >
           <p>{{item.num+1}}</p>
         </div>
@@ -36,23 +36,24 @@
     </div>
     <scroll-view scroll-y="true" class="sign-in-content">
       <ul v-if="signInListData.length>0">
-        <li v-for="(item,index) in signInListData" :key="index" :class="(item.sign?'on':'off')">
-          <div class="time">{{item.timeArea}}</div>
+        <li v-for="(item,index) in signInListData" :key="index" :class="(item.IsSignIn?'on':theisLater?'later':'off')">
+          <div class="time">{{item.SignInTime+'-'+item.SignOutTime}}</div>
           <div class="content">
-            <a :href="!isAdmin?'../../sign/detail/main':'../../sign/admin/main'">
+            <a :href="!isAdmin?'../../sign/detail/main?id='+item.Id:'../../sign/admin/main?id='+item.Id">
               <div class="l">
-                <h2>{{item.title}}</h2>
-                <p>{{item.desc}}</p>
+                <h2>{{item.Title}}</h2>
+                <p>{{item.Address}}</p>
               </div>
               <div class="r">
-                <p v-if="item.sign">已签到</p>
-                <p v-else>未签到</p>
+                <p v-if="item.IsSignIn">已签到</p>
+                <p v-if="!item.IsSignIn && theisLater">待签到</p>
+                <p v-if="!item.IsSignIn  && !theisLater">未签到</p>
               </div>
             </a>
           </div>
         </li>
       </ul>
-      <div class="notdata" v-if="signInListData.length==0">- 暂无课程 -</div>
+      <div class="notdata" v-if="signInListData.length==0">- 暂无课程数据 -</div>
     </scroll-view>
   </div>
 </template>
@@ -73,7 +74,12 @@ export default {
       thisDay: 1,
       signInListData: [],
       dateObj: { year: "", month: "" },
-      isAdmin: false
+      isAdmin: false,
+      courseData: [],
+      isSignInData: {},
+      staySignInData: {},
+      theMonth: "",
+      theisLater:false
     };
   },
   methods: {
@@ -113,12 +119,14 @@ export default {
       let year = date.getFullYear();
       let month = date.getMonth() + 1;
       this.signInDate = `${year}年${month}月`;
+      this.theMonth = `${year}-${+month > 9 ? month : "0" + month}`;
+      this.getDataLog(this.theMonth);
       this.dateObj = { year: year, month: month };
       let thisDate = new Date();
       if (isThis) {
         this.thisDay = date.getDate();
         this.theDay = date.getDate();
-        this.getData();
+        this.getData(this.thisDay);
       } else {
         this.thisDay = "";
         this.theDay = "";
@@ -137,34 +145,55 @@ export default {
         this.firstDay.push({ num: i, id: `${year}_${month}_${i}` });
       }
     },
-    getData() {
-      this.signInListData = [
-        {
-          timeArea: "09:00-10:00",
-          title: "退伍军人培训学习",
-          desc: "中国上海市浦东新区浦建路769号",
-          sign: true,
-          id: 0
-        },
-        {
-          timeArea: "14:00-16:00",
-          title: "退伍军人培训学习",
-          desc: "中国福建省厦门市莲花五村龙昌里344号",
-          sign: false,
-          id: 1
-        },
-        {
-          timeArea: "14:00-16:00",
-          title: "退伍军人培训学习",
-          desc: "中国上海市浦东新区浦建路769号",
-          sign: false,
-          id: 2
-        }
-      ];
+    getData(day) {
+      let vm = this;
+      this.$api
+        .$signGet("根据日期获取课程", {
+          date: vm.theMonth + "-" + day,
+          page: 1,
+          userid: mpvue.getStorageSync("userid")
+        })
+        .then(res => {
+          if (res.Data) {
+            vm.signInListData = res.Data.map(value=>{
+              let _arr1 = value.SignInTime.split(':');
+              value.SignInTime = `${_arr1[0]}:${_arr1[1]}`
+              let _arr2 = value.SignOutTime.split(':');
+              value.SignOutTime = `${_arr2[0]}:${_arr2[1]}`
+              return value;
+            });
+          }
+        });
     },
-    getTheDay(day) {
+    getTheDay(day,isLater) {
       this.theDay = day;
-      this.getData();
+      this.theisLater = isLater?true:false;
+      this.getData(day);
+    },
+    getDataLog(date) {
+      let vm = this;
+      this.$api
+        .$signGet("根据日期获取签到状态", {
+          date: date,
+          userid: mpvue.getStorageSync("userid")
+        })
+        .then(res => {
+          vm.courseData = res.Data;
+          let _json = {},
+            stayJson = {};
+          let theDate = new Date();
+          vm.courseData.forEach(value => {
+            //获取日期中的天数
+            let day = value.Date.split(" ")[0].split("-")[2];
+            _json[day] = value.IsSignIn;
+            let _date = new Date(value.Date);
+            if (_date.getTime() - theDate.getTime() > 0) {
+              stayJson[day] = true;
+            }
+          });
+          vm.staySignInData = stayJson;
+          vm.isSignInData = _json;
+        });
     }
   },
   onShow() {
@@ -176,6 +205,8 @@ export default {
         timingFunc: "easeIn"
       }
     });
+    let userInfo = mpvue.getStorageSync("userInfo");
+    this.isAdmin = userInfo.IsTeacher;
     this.getDates();
   },
   onLoad() {
@@ -250,6 +281,7 @@ export default {
         margin: 12rpx 0;
         height: 56rpx;
         line-height: 56rpx;
+        position: relative;
         &.on {
           p {
             background-color: #e53330;
@@ -260,6 +292,32 @@ export default {
           p {
             border: 1px solid #e53330;
             color: #e53330;
+          }
+        }
+        &.already-sign {
+          &:before {
+            content: "";
+            display: block;
+            width: 12rpx;
+            height: 4rpx;
+            background-color: #51c512;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            position: absolute;
+          }
+        }
+        &.not-sign {
+          &:before {
+            content: "";
+            display: block;
+            width: 12rpx;
+            height: 4rpx;
+            background-color: #ff8915;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            position: absolute;
           }
         }
         p {
@@ -290,6 +348,18 @@ export default {
           .content {
             .r {
               color: #51c512;
+            }
+          }
+        }
+        &.later{
+          .time {
+            &:before {
+              background: #FF8915;
+            }
+          }
+          .content {
+            .r {
+              color: #FF8915;
             }
           }
         }

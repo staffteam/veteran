@@ -152,7 +152,8 @@ export default {
       canIUse: wx.canIUse("button.open-type.getUserInfo"),
       isLogin: "-1",
       isGetCode: false,
-      isCode: ""
+      isCode: "",
+      timeObj:{}
     };
   },
   methods: {
@@ -188,28 +189,57 @@ export default {
           userid: obj.Id
         })
         .then(res => {
-          if (res.Success) {
+          if (obj.Status == 0) {
             let userInfo = mpvue.getStorageSync("userInfo");
             mpvue.setStorageSync("userInfo", {
               ...userInfo,
               ...res.Data,
               userid: obj.Id,
-              user_status:obj.Status,
+              user_status: obj.Status,
               wx_avatarUrl: userInfo.avatarUrl,
               wx_city: userInfo.city
             });
             vm.form.phone = "";
             vm.form.code = "";
             vm.hasUserInfo = false;
-            mpvue.setStorageSync("oneLogin", "1");
+            vm.codeText = "获取验证码";
+            vm.isCode = "";
+            clearInterval(vm.timeObj);
+            vm.isGetCode = false;
+            mpvue.setStorageSync("oneLogin", "-1");
             mpvue.navigateTo({
               url: "../affirmInfo/one/main"
             });
+          } else if (obj.Status == 1) {
+            mpvue.showToast({
+              title: "登陆成功",
+              icon: "success"
+            });
+            let userInfo = mpvue.getStorageSync("userInfo");
+            mpvue.setStorageSync("userInfo", {
+              ...userInfo,
+              ...res.Data,
+              userid: obj.Id,
+              user_status: obj.Status,
+              wx_avatarUrl: userInfo.avatarUrl,
+              wx_city: userInfo.city
+            });
+            mpvue.setStorageSync("userid", obj.Id);
+            vm.form.phone = "";
+            vm.form.code = "";
+            vm.hasUserInfo = false;
+            vm.codeText = "获取验证码";
+            vm.isCode = "";
+            clearInterval(vm.timeObj);
+            vm.isGetCode = false;
+            vm.isLogin = "0";
+            mpvue.showTabBar();
+            mpvue.setStorageSync("oneLogin", "1");
           } else {
             mpvue.showToast({
-              title: res.Msg,
+              title: "您的信息正在审核中\r\n请耐心等待",
               icon: "none",
-              duration: 1000
+              duration: 2000
             });
           }
         });
@@ -222,23 +252,17 @@ export default {
         vm.showHint("手机号格式有误");
       } else if (vm.form.code == "") {
         vm.showHint("请输入验证码");
-      } else if (vm.form.code != vm.isCode) {
-        vm.showHint("验证码有误");
-      } else {
+      } 
+      // else if (vm.form.code != vm.isCode) {
+      //   vm.showHint("验证码有误");
+      // } 
+      else {
         this.$api
           .$signGet("登陆", {
             value: String(vm.form.phone)
           })
           .then(res => {
-            if (res.Success) {
-              vm.getInfos(res.Data);
-            } else {
-              mpvue.showToast({
-                title: res.Msg,
-                icon: "none",
-                duration: 1000
-              });
-            }
+            vm.getInfos(res.Data);
           });
       }
     },
@@ -255,33 +279,25 @@ export default {
               phone: String(vm.form.phone)
             })
             .then(res => {
-              if (res.Success) {
-                mpvue.showToast({
-                  title: "发送成功",
-                  icon: "success",
-                  duration: 1000
-                });
-                vm.codeText = "60s后重新获取";
-                vm.isGetCode = true;
-                vm.isCode = res.Data;
-                let _i = 60;
-                let timeObj = setInterval(_ => {
-                  _i--;
-                  if (_i == 0) {
-                    vm.codeText = "重新获取验证码";
-                    clearInterval(timeObj);
-                    vm.isGetCode = false;
-                  } else {
-                    vm.codeText = `${_i}s后重新获取`;
-                  }
-                }, 1000);
-              } else {
-                mpvue.showToast({
-                  title: res.Msg,
-                  icon: "none",
-                  duration: 1000
-                });
-              }
+              mpvue.showToast({
+                title: "发送成功",
+                icon: "success",
+                duration: 1000
+              });
+              vm.codeText = "60s后重新获取";
+              vm.isGetCode = true;
+              vm.isCode = res.Data;
+              let _i = 60;
+              vm.timeObj = setInterval(_ => {
+                _i--;
+                if (_i == 0) {
+                  vm.codeText = "重新获取验证码";
+                  clearInterval(vm.timeObj);
+                  vm.isGetCode = false;
+                } else {
+                  vm.codeText = `${_i}s后重新获取`;
+                }
+              }, 1000);
             });
         }
       }

@@ -9,8 +9,16 @@ const path = {
   '用户反馈': `${api}/Member/SubmitMessage`,
   '教学点列表': `${api}/Member/GetSchoolList`,
   '课程详情': `${api}/Course/GetVedioCourseDetail`,
-  '登陆':`${api}/Member/Login`,
-  '根据学生Id获取信息':`${api}/Member/GetInfoById`
+  '登陆': `${api}/Member/Login`,
+  '根据学生Id获取信息': `${api}/Member/GetInfoById`,
+  '根据日期获取签到状态':`${api}/Course/GetSignInDateList`,
+  '根据日期获取课程':`${api}/Course/GetCourseListByDate`,
+  '课程详情':`${api}/Course/GetCourseDetail`,
+  '老师查看课程':`${api}/Course/GetCourseSignInDetail`,
+  '老师查看课程签到列表':`${api}/Course/GetSignInList`,
+  '学生签到':`${api}/Course/CourseSignIn`,
+  '老师确认签到':`${api}/Course/ConfirmSignIn`,
+  '老师一键确认签到':`${api}/Course/ConfirmSignInAll`,
 };
 const load = {
   show() {
@@ -33,7 +41,15 @@ const $get = (name, data, header) => {
       success(res) {
         load.hide();
         if (res.statusCode == '200') {
-          resolve(res.data);
+          if (res.data.Success) {
+            resolve(res.data);
+          } else {
+            mpvue.showToast({
+              title: res.data.Msg,
+              icon: "none",
+              duration: 1000
+            });
+          }
         } else {
           mpvue.showToast({
             title: "网络异常，请稍后重试",
@@ -70,7 +86,15 @@ const $post = (name, data, header) => {
       success(res) {
         load.hide();
         if (res.statusCode == '200') {
-          resolve(res.data);
+          if (res.data.Success) {
+            resolve(res.data);
+          } else {
+            mpvue.showToast({
+              title: res.data.Msg,
+              icon: "none",
+              duration: 1000
+            });
+          }
         } else {
           mpvue.showToast({
             title: "网络异常，请稍后重试",
@@ -110,7 +134,15 @@ const $keyGet = (name, data, header) => {
       success(res) {
         load.hide();
         if (res.statusCode == '200') {
-          resolve(res.data);
+          if (res.data.Success) {
+            resolve(res.data);
+          } else {
+            mpvue.showToast({
+              title: res.data.Msg,
+              icon: "none",
+              duration: 1000
+            });
+          }
         } else {
           mpvue.showToast({
             title: "网络异常，请稍后重试",
@@ -150,7 +182,15 @@ const $keyPost = (name, data, header) => {
       success(res) {
         load.hide();
         if (res.statusCode == '200') {
-          resolve(res.data);
+          if (res.data.Success) {
+            resolve(res.data);
+          } else {
+            mpvue.showToast({
+              title: res.data.Msg,
+              icon: "none",
+              duration: 1000
+            });
+          }
         } else {
           mpvue.showToast({
             title: "网络异常，请稍后重试",
@@ -189,7 +229,15 @@ const $signPost = (name, data, header) => {
       success(res) {
         load.hide();
         if (res.statusCode == '200') {
-          resolve(res.data);
+          if (res.data.Success) {
+            resolve(res.data);
+          } else {
+            mpvue.showToast({
+              title: res.data.Msg,
+              icon: "none",
+              duration: 1000
+            });
+          }
         } else {
           mpvue.showToast({
             title: "网络异常，请稍后重试",
@@ -218,7 +266,6 @@ const $signPost = (name, data, header) => {
     } else {
       obj.header = common.getSign(data);
     }
-    console.log(obj.header);
     mpvue.request(obj);
   })
 }
@@ -235,7 +282,15 @@ const $signGet = (name, data, header) => {
       success(res) {
         load.hide();
         if (res.statusCode == '200') {
-          resolve(res.data);
+          if (res.data.Success) {
+            resolve(res.data);
+          } else {
+            mpvue.showToast({
+              title: res.data.Msg,
+              icon: "none",
+              duration: 1000
+            });
+          }
         } else {
           mpvue.showToast({
             title: "网络异常，请稍后重试",
@@ -264,7 +319,6 @@ const $signGet = (name, data, header) => {
     } else {
       obj.header = common.getSign(data);
     }
-    console.log(obj.header);
     mpvue.request(obj);
   })
 }

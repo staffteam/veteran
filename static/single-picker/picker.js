@@ -1,5 +1,7 @@
 // picker/picker.js
-import { isPlainObject } from './tool'
+import {
+  isPlainObject
+} from './tool'
 
 Component({
   /**
@@ -8,12 +10,12 @@ Component({
   properties: {
     scrollType: {
       type: String,
-      value: 'normal'// "link": scroll间联动  "normal": scroll相互独立
+      value: 'normal' // "link": scroll间联动  "normal": scroll相互独立
     },
     listData: {
       type: Array,
       value: [],
-      observer: function(newVal) {
+      observer: function (newVal) {
         if (newVal.length === 0 || this._compareDate()) return
         this._setTempData()
         const tempArr = [...new Array(newVal.length).keys()].map(() => 0)
@@ -29,7 +31,7 @@ Component({
     defaultPickData: {
       type: Array,
       value: [],
-      observer: function(newVal) {
+      observer: function (newVal) {
         if (newVal.length === 0 || this._compareDate()) return
         this._setTempData()
         this._setDefault()
@@ -42,7 +44,7 @@ Component({
     isShowPicker: {
       type: Boolean,
       value: false,
-      observer: function(newVal) {
+      observer: function (newVal) {
         if (newVal) {
           this._openPicker()
         } else {
@@ -50,25 +52,43 @@ Component({
         }
       }
     },
-    titleText: {// 标题文案
+    titleText: { // 标题文案
       type: String,
       value: '标题'
     },
-    cancelText: {// 取消按钮文案
+    cancelText: { // 取消按钮文案
       type: String,
       value: '取消'
     },
-    sureText: {// 确定按钮文案
+    sureText: { // 确定按钮文案
       type: String,
       value: '确定'
     },
-    pickerHeaderStyle: String, // 标题栏样式 view
-    sureStyle: String, // 标题栏确定样式  text
-    cancelStyle: String, // 标题栏取消样式 text
-    titleStyle: String, // 标题栏标题样式  view
+    pickerHeaderStyle: {
+      type:String,
+      value:"border-bottom:1px solid #e5e5e5;"
+    }, // 标题栏样式 view
+    sureStyle: {
+      type:String,
+      value:"color:#e53330;font-size:30rpx;"
+    }, // 标题栏确定样式  text
+    cancelStyle: {
+      type:String,
+      value:"color:#333333;font-size:30rpx;"
+    }, // 标题栏取消样式 text
+    titleStyle: {
+      type:String,
+      value:"display:none;"
+    }, // 标题栏标题样式  view
     maskStyle: String, // 设置蒙层的样式（详见picker-view） view
-    indicatorStyle: String, // 设置选择器中间选中框的样式（详见picker-view） view
-    chooseItemTextStyle: String// 设置picker列表文案样式 text
+    indicatorStyle: {
+      type:String,
+      value:'height:35px'
+    }, // 设置选择器中间选中框的样式（详见picker-view） view
+    chooseItemTextStyle: {
+      type:String,
+      value:"color:#333333;font-size:28rpx;"
+    } // 设置picker列表文案样式 text
   },
 
   /**
@@ -80,6 +100,7 @@ Component({
     backData: [],
     height: 0,
     isOpen: false,
+    isShow: false,
     isUseKeywordOfShow: false,
     scrollEnd: true, // 滚动是否结束
     lastValue: [], // 上次各个colum的选择索引
@@ -102,7 +123,10 @@ Component({
       this._closePicker()
     },
     sure() {
-      const { scrollEnd, tempValue } = this.data
+      const {
+        scrollEnd,
+        tempValue
+      } = this.data
       if (!scrollEnd) return
       const backData = this._getBackDataFromValue(tempValue)
       this.setData({
@@ -115,8 +139,12 @@ Component({
       this._closePicker()
     },
     _bindChange(e) {
-      const { scrollType } = this.properties
-      const { lastValue } = this.data
+      const {
+        scrollType
+      } = this.properties
+      const {
+        lastValue
+      } = this.data
       let val = e.detail.value
       switch (scrollType) {
         case 'normal':
@@ -156,7 +184,9 @@ Component({
       }
     },
     _validate(val) {
-      const { columnsData } = this.data
+      const {
+        columnsData
+      } = this.data
       columnsData.forEach((v, i) => {
         if (columnsData[i].length - 1 < val[i]) {
           val[i] = columnsData[i].length - 1
@@ -180,14 +210,26 @@ Component({
         }
       }
       this.data.isFirstOpen = false
-      this.setData({
+      let vm = this;
+      vm.setData({
         isOpen: true
       })
+      setTimeout(_ => {
+        vm.setData({
+          isShow: true
+        })
+      }, 10)
     },
     _closePicker() {
-      this.setData({
-        isOpen: false
+      let vm = this;
+      vm.setData({
+        isShow: false
       })
+      setTimeout(_ => {
+        vm.setData({
+          isOpen: false
+        })
+      }, 200)
     },
     _getColumnData(arr) {
       return arr.map((v) => this._fomateObj(v))
@@ -220,10 +262,17 @@ Component({
       }
     },
     _setDefault(inBackData) {
-      const { scrollType } = this.properties
-      let { listData, defaultPickData } = this.properties
-      if(!listData[0])return false;
-      const { lastValue } = this.data
+      const {
+        scrollType
+      } = this.properties
+      let {
+        listData,
+        defaultPickData
+      } = this.properties
+      if (!listData[0]) return false;
+      const {
+        lastValue
+      } = this.data
       if (inBackData) {
         defaultPickData = inBackData
       }
@@ -297,8 +346,13 @@ Component({
       }
     },
     _computedBackData(backData) {
-      const { scrollType, listData } = this.properties
-      const { onlyKey } = this.data
+      const {
+        scrollType,
+        listData
+      } = this.properties
+      const {
+        onlyKey
+      } = this.data
       if (scrollType === 'normal') {
         return backData.map((v, i) => listData[i].findIndex((vv, ii) => this._compareObj(v, vv)))
       } else {
@@ -312,7 +366,9 @@ Component({
       }
     },
     _compareObj(o1, o2) {
-      const { keyWordsOfShow } = this.properties
+      const {
+        keyWordsOfShow
+      } = this.properties
       if (typeof o1 !== 'object') {
         return o1 === o2
       } else {
@@ -331,13 +387,22 @@ Component({
       return tempArr
     },
     _compareDate() { // 完全相等返回true
-      const { defaultPickDataTemp, listDataTemp } = this.data
-      const { defaultPickData, listData } = this.properties
+      const {
+        defaultPickDataTemp,
+        listDataTemp
+      } = this.data
+      const {
+        defaultPickData,
+        listData
+      } = this.properties
 
       return defaultPickDataTemp === defaultPickData && listDataTemp === listData
     },
     _setTempData() {
-      const { defaultPickData, listData } = this.properties
+      const {
+        defaultPickData,
+        listData
+      } = this.properties
       this.data.defaultPickDataTemp = defaultPickData
       this.data.listDataTemp = listData
     }

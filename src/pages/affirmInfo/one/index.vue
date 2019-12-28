@@ -16,16 +16,17 @@
               type="text"
               v-model="userInfo.Areas"
               placeholder-style="color:#e53330;"
-              :disabled="isReadonly"
-              @click="showCityPicker"
+              disabled="disabled"
+              @click="openAreas"
             />
-            <city-picker
-              id="city-picker"
-              :value="cityPickerValue"
-              :isShow="cityPickerIsShow"
-              @sureclick="cityPickerOnSureClick"
-              @cancelclick="cityPickerOnCancelClick"
-            />
+            <single-picker
+              :isShowPicker="isOpenAreas"
+              @sure="areasSure"
+              @cancle="areasCancle"
+              scrollType="link"
+              :listData="areasData"
+              :defaultPickData="areasValue"
+            ></single-picker>
           </div>
           <div class="item">
             <span>教&ensp;学&ensp;点</span>
@@ -33,7 +34,7 @@
               type="text"
               v-model="userInfo.SchoolName"
               placeholder-style="color:#e53330;"
-              :disabled="isReadonly"
+              disabled="disabled"
               @click="openSelect"
             />
             <single-picker
@@ -43,14 +44,6 @@
               scrollType="normal"
               :listData="[schoolData]"
               :defaultPickData="schoolValue"
-              indicatorStyle="height:35px"
-              sureStyle="color:#e53330;font-size:30rpx;"
-              cancelStyle="color:#333333;font-size:30rpx;"
-              chooseItemTextStyle="color:#333333;font-size:30rpx;"
-              pickerHeaderStyle="border-bottom:1px solid #e5e5e5;"
-              titleStyle="display:none;"
-              cancelText="取消"
-              sureText="确定"
             ></single-picker>
           </div>
         </div>
@@ -80,8 +73,9 @@ export default {
       hostInfo: {},
       isReadonly: true,
       errorCorrection: false,
-      cityPickerValue: [0, 0],
-      cityPickerIsShow: false,
+      isOpenAreas: false,
+      areasValue: [{ name: "北京市" }, { name: "市辖区" }],
+      areasData: [],
       schoolList: [],
       schoolJson: {},
       schoolValue: [0],
@@ -91,39 +85,33 @@ export default {
   },
   methods: {
     openSelect() {
-      if(!this.isReadonly){
+      if (!this.isReadonly) {
         this.isOpen = true;
       }
     },
-    schoolSure(val) {
-      debugger;
+    schoolSure(e) {
       this.isOpen = false;
-      // this.schoolValue = val;
-      // this.userInfo.SchoolName = this.schoolData[val[0]];
-      // this.userInfo.SchoolId = this.schoolJson[this.schoolData[val[0]]];
+      let val = e.mp.detail.choosedIndexArr;
+      this.schoolValue = val;
+      this.userInfo.SchoolName = this.schoolData[val[0]];
+      this.userInfo.SchoolId = this.schoolJson[this.schoolData[val[0]]];
     },
-    schoolCancle(){
+    schoolCancle() {
       this.isOpen = false;
     },
-    /**
-     * 城市选择确认
-     */
-    cityPickerOnSureClick: function(e) {
-      let _data = e.mp.detail;
-      this.userInfo.Areas = _data.valueName[0] + _data.valueName[1];
-      this.cityPickerValue = _data.valueCode;
-      this.cityPickerIsShow = false;
-    },
-    /**
-     * 城市选择取消
-     */
-    cityPickerOnCancelClick: function(event) {
-      this.cityPickerIsShow = false;
-    },
-    showCityPicker() {
+    openAreas() {
       if (!this.isReadonly) {
-        this.cityPickerIsShow = true;
+        this.isOpenAreas = true;
       }
+    },
+    areasSure(e) {
+      this.isOpenAreas = false;
+      let _data = e.mp.detail.choosedData;
+      this.areasValue = [{ name: _data[0].name }, { name: _data[1].name }];
+      this.userInfo.Areas = _data[0].name + " " + _data[1].name;
+    },
+    areasCancle() {
+      this.isOpenAreas = false;
     },
     showHint(text, time = 1000) {
       let vm = this;
@@ -151,7 +139,6 @@ export default {
     },
     gonext() {
       let vm = this;
-      let userInfo = mpvue.getStorageSync("userInfo");
       if (vm.userInfo.Areas == "") {
         vm.showHint("请输入地区");
       } else if (vm.userInfo.SchoolName == "") {
@@ -159,20 +146,16 @@ export default {
       } else {
         if (!this.isReadonly) {
           vm.$api
-            .$signPost("纠错", {
-              Areas: vm.userInfo.Areas,
-              SchoolId: vm.userInfo.SchoolId
+            .$signGet("纠错", {
+              args: {
+                Areas: vm.userInfo.Areas,
+                SchoolId: vm.userInfo.SchoolId,
+                StudentId: vm.userInfo.userid
+              }
             })
             .then(res => {
-              userInfo.Areas = vm.userInfo.Areas;
-              userInfo.SchoolName = vm.userInfo.SchoolName;
-              userInfo.SchoolId = vm.userInfo.SchoolId;
-              mpvue.setStorageSync("userInfo", userInfo);
-              mpvue.navigateTo({
-                url: "../../affirmInfo/two/main"
-              });
+              vm.errorCorrection = true;
             });
-          this.errorCorrection = true;
         } else {
           vm.affirmCorrection();
         }
@@ -181,19 +164,15 @@ export default {
     affirmCorrection(is) {
       let vm = this;
       if (is) {
+        mpvue.removeStorageSync("userInfo");
+        mpvue.removeStorageSync("userid");
+        mpvue.switchTab({
+          url: "../../index/main"
+        });
+      } else {
         mpvue.navigateTo({
           url: "../../affirmInfo/two/main"
         });
-      } else {
-        vm.$api
-          .$signPost("学员确认信息", {
-            userid: vm.userInfo.userid
-          })
-          .then(res => {
-            mpvue.navigateTo({
-              url: "../../affirmInfo/two/main"
-            });
-          });
       }
     }
   },
@@ -207,37 +186,26 @@ export default {
       }
     });
     let vm = this;
+    vm.areasData = this.$common.cityData;
     let userInfo = mpvue.getStorageSync("userInfo");
     if (userInfo) {
       this.userInfo = userInfo;
     }
+    mpvue.setStorageSync("oneLogin", "-1");
     this.$api.$signGet("教学点列表", {}).then(res => {
-      if (res.Success) {
-        vm.schoolList = [
-          ...res.Data,
-          {
-            CreateTime: "2019-12-20 17:13:35",
-            EnCode: "school",
-            Id: "1207947833622138881",
-            Image: null,
-            IsTree: null,
-            Name: "坂田教学点2",
-            ParentId: null,
-            SortNo: 0,
-            UpdateTime: null
-          }
-        ];
-        let _arr = [],
-          _arr2 = {};
-        vm.schoolList.forEach(value => {
-          _arr.push(value.Name);
-          _arr2[value.Name] = value.Id;
-        });
-        console.log(_arr);
-        this.schoolData = _arr;
-        this.schoolJson = _arr2;
-      }
+      vm.schoolList = res.Data;
+      let _arr = [],
+        _arr2 = {};
+      vm.schoolList.forEach(value => {
+        _arr.push(value.Name);
+        _arr2[value.Name] = value.Id;
+      });
+      this.schoolData = _arr;
+      this.schoolJson = _arr2;
     });
+  },
+  onUnload(){
+    mpvue.setStorageSync("oneLogin", "1");
   },
   onLoad() {
     let vm = this;

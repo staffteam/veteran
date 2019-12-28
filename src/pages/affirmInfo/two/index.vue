@@ -23,7 +23,7 @@
             <span>身份证号</span>
             <input
               type="text"
-              v-model="userInfo.identityCard"
+              v-model="userInfo.IdCard"
               placeholder-style="color:#e53330;"
               :disabled="isReadonly"
             />
@@ -48,7 +48,7 @@
       <i class="iconfont icon-dui"></i>
       <h2>提交成功</h2>
       <div>工作人员将会在3个工作日内审核您的申请，敬请留意</div>
-      <p @click="affirmCorrection">知道了</p>
+      <p @click="affirmCorrection(true)">知道了</p>
     </div>
     <hint :commonMsg="commonMsg" :title="commonTitle" />
   </div>
@@ -81,16 +81,16 @@ export default {
         this.isReadonly = false;
         this.hostInfo = {
           Name: this.userInfo.Name,
-          identityCard: this.userInfo.identityCard,
+          IdCard: this.userInfo.IdCard,
           Phone: this.userInfo.Phone
         };
         this.userInfo.Name = "";
-        this.userInfo.identityCard = "";
+        this.userInfo.IdCard = "";
         this.userInfo.Phone = "";
       } else {
         this.isReadonly = true;
         this.userInfo.Name = this.hostInfo.Name;
-        this.userInfo.identityCard = this.hostInfo.identityCard;
+        this.userInfo.IdCard = this.hostInfo.IdCard;
         this.userInfo.Phone = this.hostInfo.Phone;
       }
     },
@@ -98,14 +98,14 @@ export default {
       let vm = this;
       if (vm.userInfo.Name == "") {
         vm.showHint("请输入姓名");
-      } else if (vm.userInfo.identityCard == "") {
+      } else if (vm.userInfo.IdCard == "") {
         vm.showHint("请输入身份证");
       } else if (
         !/^[1-9]\d{5}(18|19|([23]\d))\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$/.test(
-          vm.userInfo.identityCard
+          vm.userInfo.IdCard
         ) &&
-        !/^([A-Z]\d{6,10}(\(\w{1}\))?)$/.test(vm.userInfo.identityCard) &&
-        !/^\d{8}|^[a-zA-Z0-9]{10}|^\d{18}$/.test(vm.userInfo.identityCard)
+        !/^([A-Z]\d{6,10}(\(\w{1}\))?)$/.test(vm.userInfo.IdCard) &&
+        !/^\d{8}|^[a-zA-Z0-9]{10}|^\d{18}$/.test(vm.userInfo.IdCard)
       ) {
         vm.showHint("身份证格式有误");
       } else if (vm.userInfo.Phone == "") {
@@ -116,27 +116,38 @@ export default {
         if (!this.isReadonly) {
           this.errorCorrection = true;
         } else {
-          let userInfo = mpvue.getStorageSync("userInfo");
-          userInfo.Name = this.userInfo.Name;
-          userInfo.identityCard = this.userInfo.identityCard;
-          userInfo.Phone = this.userInfo.Phone;
-          mpvue.setStorageSync("userInfo", userInfo);
-          mpvue.navigateTo({
-            url: "../../affirmInfo/three/main"
-          });
+          if (!this.isReadonly) {
+            vm.$api
+              .$signPost("纠错", {
+                args: {
+                  Name: vm.userInfo.Name,
+                  IdCard: vm.userInfo.IdCard,
+                  Phone: vm.userInfo.Phone,
+                  StudentId: vm.userInfo.userid
+                }
+              })
+              .then(res => {
+                vm.errorCorrection = true;
+              });
+          } else {
+            vm.affirmCorrection();
+          }
         }
       }
     },
-    affirmCorrection() {
+    affirmCorrection(is) {
       let vm = this;
-      let userInfo = mpvue.getStorageSync("userInfo");
-      userInfo.Name = this.userInfo.Name;
-      userInfo.identityCard = this.userInfo.identityCard;
-      userInfo.Phone = this.userInfo.Phone;
-      mpvue.setStorageSync("userInfo", userInfo);
-      mpvue.navigateTo({
-        url: "../../affirmInfo/three/main"
-      });
+      if (is) {
+        mpvue.removeStorageSync("userInfo");
+        mpvue.removeStorageSync("userid");
+        mpvue.switchTab({
+          url: "../../index/main"
+        });
+      } else {
+        mpvue.navigateTo({
+          url: "../../affirmInfo/three/main"
+        });
+      }
     }
   },
   onShow() {

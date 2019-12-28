@@ -14,7 +14,7 @@
             <span>中队编号</span>
             <input
               type="text"
-              v-model="userInfo.SquadNo"
+              v-model="userInfo.SquadronNo"
               placeholder-style="color:#e53330;"
               :disabled="isReadonly"
             />
@@ -23,7 +23,7 @@
             <span>中&ensp;队&ensp;长</span>
             <input
               type="text"
-              v-model="userInfo.foreman"
+              v-model="userInfo.SquadronCaptain"
               placeholder-style="color:#e53330;"
               :disabled="isReadonly"
             />
@@ -32,21 +32,28 @@
             <span>分&ensp;队&ensp;长</span>
             <input
               type="text"
-              v-model="userInfo.hisCommander"
+              v-model="userInfo.SquadCaptain"
               placeholder-style="color:#e53330;"
               :disabled="isReadonly"
             />
           </div>
           <div class="item">
             <span>退役时间</span>
-            <picker
-              mode="date"
-              :disabled="isReadonly"
-              :value="userInfo.retiredTime"
-              @change="bindTimeChange"
-            >
-              <view class="picker">{{userInfo.retiredTime}}</view>
-            </picker>
+            <input
+              type="text"
+              v-model="userInfo.EnlistEndTime"
+              placeholder-style="color:#e53330;"
+              disabled="disabled"
+              @click="openDate"
+            />
+            <date-picker
+              id="date-picker"
+              :value="dateVal"
+              :issShow="issShow"
+              :isShow="isShow"
+              @sureclick="sureClick"
+              @cancelclick="cancelclick"
+            />
           </div>
         </div>
         <div class="submit-btn">
@@ -59,7 +66,7 @@
       <i class="iconfont icon-dui"></i>
       <h2>提交成功</h2>
       <div>工作人员将会在3个工作日内审核您的申请，敬请留意</div>
-      <p @click="affirmCorrection">知道了</p>
+      <p @click="affirmCorrection(true)">知道了</p>
     </div>
     <hint :commonMsg="commonMsg" :title="commonTitle" />
   </div>
@@ -74,12 +81,31 @@ export default {
       userInfo: {},
       hostInfo: {},
       isReadonly: true,
-      errorCorrection: false
+      errorCorrection: false,
+      dateVal: ["", "", ""],
+      issShow: false,
+      isShow: false
     };
   },
   methods: {
-    bindTimeChange(e) {
-      this.userInfo.retiredTime = e.mp.detail.value;
+    openDate() {
+      this.isShow = true;
+      this.issShow = true;
+    },
+    sureClick: function(e) {
+      this.issShow = false;
+      let val = e.mp.detail.value;
+      this.dateVal = val;
+      setTimeout(_ => {
+        this.userInfo.EnlistEndTime = `${val[0]}-${val[1]}-${val[2]}`;
+        this.isShow = false;
+      }, 10);
+    },
+    cancelclick: function(event) {
+      this.issShow = false;
+      setTimeout(_ => {
+        this.isShow = false;
+      }, 200);
     },
     showHint(text, time = 1000) {
       let vm = this;
@@ -94,62 +120,80 @@ export default {
       if (this.isReadonly) {
         this.isReadonly = false;
         this.hostInfo = {
-          squadronNum: this.userInfo.squadronNum,
-          foreman: this.userInfo.foreman,
-          hisCommander: this.userInfo.hisCommander,
-          retiredTime: this.userInfo.retiredTime
+          SquadronNo: this.userInfo.SquadronNo,
+          SquadronCaptain: this.userInfo.SquadronCaptain,
+          SquadCaptain: this.userInfo.SquadCaptain,
+          EnlistEndTime: this.userInfo.EnlistEndTime
         };
-        this.userInfo.squadronNum = "";
-        this.userInfo.foreman = "";
-        this.userInfo.hisCommander = "";
-        this.userInfo.retiredTime = "";
+        this.userInfo.SquadronNo = "";
+        this.userInfo.SquadronCaptain = "";
+        this.userInfo.SquadCaptain = "";
+        this.userInfo.EnlistEndTime = "";
       } else {
         this.isReadonly = true;
-        this.userInfo.squadronNum = this.hostInfo.squadronNum;
-        this.userInfo.foreman = this.hostInfo.foreman;
-        this.userInfo.hisCommander = this.hostInfo.hisCommander;
-        this.userInfo.retiredTime = this.hostInfo.retiredTime;
+        this.userInfo.SquadronNo = this.hostInfo.SquadronNo;
+        this.userInfo.SquadronCaptain = this.hostInfo.SquadronCaptain;
+        this.userInfo.SquadCaptain = this.hostInfo.SquadCaptain;
+        this.userInfo.EnlistEndTime = this.hostInfo.EnlistEndTime;
       }
     },
     gonext() {
       let vm = this;
-      if (vm.userInfo.squadronNum == "") {
+      if (vm.userInfo.SquadronNo == "") {
         vm.showHint("请输入中队编号");
-      } else if (vm.userInfo.foreman == "") {
+      } else if (vm.userInfo.SquadronCaptain == "") {
         vm.showHint("请输入中队长姓名");
-      } else if (vm.userInfo.hisCommander == "") {
+      } else if (vm.userInfo.SquadCaptain == "") {
         vm.showHint("请输入分队长姓名");
-      } else if (vm.userInfo.retiredTime == "") {
+      } else if (vm.userInfo.EnlistEndTime == "") {
         vm.showHint("请选择退役时间");
       } else {
         if (!this.isReadonly) {
-          this.errorCorrection = true;
+          vm.$api
+            .$signPost("纠错", {
+              args: {
+                SquadronNo: vm.userInfo.SquadronNo,
+                SquadronCaptain: vm.userInfo.SquadronCaptain,
+                SquadCaptain: vm.userInfo.SquadCaptain,
+                EnlistEndTime: vm.userInfo.EnlistEndTime,
+                StudentId: vm.userInfo.userid
+              }
+            })
+            .then(res => {
+              vm.errorCorrection = true;
+            });
         } else {
-          let userInfo = mpvue.getStorageSync("userInfo");
-          userInfo.squadronNum = this.userInfo.squadronNum;
-          userInfo.foreman = this.userInfo.foreman;
-          userInfo.hisCommander = this.userInfo.hisCommander;
-          userInfo.retiredTime = this.userInfo.retiredTime;
-          mpvue.setStorageSync("userInfo", userInfo);
-          mpvue.setStorageSync("userid", userInfo.userid);
-          wx.switchTab({
-            url: "../../index/main"
-          });
+          vm.affirmCorrection();
         }
       }
     },
-    affirmCorrection() {
+    affirmCorrection(is) {
       let vm = this;
-      let userInfo = mpvue.getStorageSync("userInfo");
-      userInfo.squadronNum = this.userInfo.squadronNum;
-      userInfo.foreman = this.userInfo.foreman;
-      userInfo.hisCommander = this.userInfo.hisCommander;
-      userInfo.retiredTime = this.userInfo.retiredTime;
-      mpvue.setStorageSync("userInfo", userInfo);
-      mpvue.setStorageSync("userid", userInfo.userid);
-      wx.switchTab({
-        url: "../../index/main"
-      });
+      if (is) {
+        mpvue.removeStorageSync("userInfo");
+        mpvue.removeStorageSync("userid");
+        mpvue.switchTab({
+          url: "../../index/main"
+        });
+      } else {
+        vm.$api
+          .$signPost("学员确认信息", {
+            userid: vm.userInfo.userid
+          })
+          .then(res => {
+            mpvue.showToast({
+              title: "信息确认成功",
+              icon: "success"
+            });
+            setTimeout(_ => {
+              mpvue.setStorageSync("userid", vm.userInfo.userid);
+              mpvue.setStorageSync("oneLogin", "1");
+              mpvue.switchTab({
+                url: "../../index/main"
+              });
+            }, 1500);
+          });
+      }
     }
   },
   onShow() {
@@ -164,6 +208,10 @@ export default {
     let userInfo = mpvue.getStorageSync("userInfo");
     if (userInfo) {
       this.userInfo = userInfo;
+      let time = this.userInfo.EnlistEndTime;
+      if (time) {
+        this.userInfo.EnlistEndTime = time.split(" ")[0];
+      }
     }
   },
   onLoad() {

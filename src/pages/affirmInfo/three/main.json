@@ -1,4 +1,6 @@
 {
-    "navigationBarTitleText": "确认信息"
+  "navigationBarTitleText": "确认信息",
+  "usingComponents": {
+    "date-picker": "../../../static/date-picker/date-picker"
   }
-  
+}

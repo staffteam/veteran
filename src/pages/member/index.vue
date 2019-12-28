@@ -6,11 +6,11 @@
       </p>
       <div class="title-main">
         <p>
-          <img :src="userInfo.avatarUrl" mode="widthFix" />
+          <img :src="userInfo.Image" @error="errorImg" mode="widthFix" />
         </p>
         <div>
-          <h2>{{userInfo.name}}</h2>
-          <p>{{userInfo.squadronNum}}退役军人</p>
+          <h2>{{userInfo.Name}}</h2>
+          <p>{{userInfo.SquadronNo}}退役军人</p>
         </div>
       </div>
     </div>
@@ -101,6 +101,9 @@ export default {
     };
   },
   methods: {
+    errorImg(){
+      this.userInfo.Image = '/static/images/top.png';
+    },
     outLogin() {
       mpvue.removeStorageSync("userInfo");
       mpvue.removeStorageSync("userid");
@@ -156,6 +159,7 @@ export default {
         float: left;
         border-radius: 50%;
         overflow: hidden;
+        background-color: white;
         img {
           width: 100%;
         }
