@@ -17,10 +17,10 @@ export default {
 </script>
 <style src="@/components/font/iconfont.css"></style>
 <style lang="less">
-.notdata{
+.notdata {
   padding: 100rpx 0;
   text-align: center;
-  font-size:28rpx;
+  font-size: 28rpx;
   color: #999;
 }
 view,
@@ -36,19 +36,19 @@ image {
     list-style: none;
   }
 }
-.main-content{
+.main-content {
   .wxParse {
-    .p{
+    .p {
       margin: 5rpx 0;
     }
   }
 }
-.detail-content{
+.detail-content {
   .wxParse {
-    .p{
+    .p {
       margin: 5rpx 0;
     }
-    .h2{
+    .h2 {
       margin: 5rpx 0;
     }
   }
@@ -212,5 +212,39 @@ button.userLogin {
   height: 100%;
   z-index: 99;
   opacity: 0;
+}
+
+.wxparse-mains {
+  .wxParse {
+    .h1 {
+      margin: 0 0;
+    }
+    .h2 {
+      margin: 0 0;
+    }
+    .h3 {
+      margin: 0 0;
+    }
+    .h4 {
+      margin: 0 0;
+    }
+    .h5 {
+      margin: 0 0;
+    }
+    .h6 {
+      margin: 0 0;
+    }
+    .p {
+      margin: 5px 0;
+    }
+    .pre {
+      margin: 0 0px;
+    }
+    .ul,
+    .ol {
+      margin: 0 0;
+      padding-left: 0;
+    }
+  }
 }
 </style>

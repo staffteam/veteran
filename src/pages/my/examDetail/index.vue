@@ -4,7 +4,7 @@
       <img src="/static/images/exam-detail-top.jpg" mode="widthFix" />
     </div>
     <div class="exam-detail-main">
-      <h2>政治常识科目政治常识科目政治常识科目</h2>
+      <h2>{{exam.Name}}</h2>
       <div class="content">
         <ul>
           <li>
@@ -13,7 +13,7 @@
             </p>
             <div>
               <h2>试卷总分</h2>
-              <p>{{exam.totalPoints}}分</p>
+              <p>{{exam.Score || 100}}分</p>
             </div>
           </li>
           <li>
@@ -22,7 +22,7 @@
             </p>
             <div>
               <h2>及格分</h2>
-              <p>{{exam.passingGrade}}分</p>
+              <p>{{exam.PassScore || 60}}分</p>
             </div>
           </li>
           <li>
@@ -31,7 +31,7 @@
             </p>
             <div>
               <h2>总题数</h2>
-              <p>{{exam.totalTitle}}题</p>
+              <p>{{exam.TopicCount}}题</p>
             </div>
           </li>
           <li>
@@ -40,22 +40,22 @@
             </p>
             <div>
               <h2>考试时长</h2>
-              <p>{{exam.testTime}}分钟</p>
+              <p>{{exam.ExamTime}}分钟</p>
             </div>
           </li>
         </ul>
         <div class="test-item">
           <h2>考试时间</h2>
           <div style="padding-top:36rpx;">
-            <p>{{exam.start_time}}</p>
+            <p>{{exam.ExamStartTime}}</p>
             <span>至</span>
-            <p>{{exam.end_time}}</p>
+            <p>{{exam.ExamEndTime}}</p>
           </div>
         </div>
         <div class="test-item">
           <h2>考试内容</h2>
           <div>
-            <h2>{{exam.testContent}}</h2>
+            <h2>{{exam.Content}}</h2>
           </div>
         </div>
       </div>
@@ -71,20 +71,13 @@ export default {
   data() {
     return {
       exam: {
-        totalPoints: "100",
-        passingGrade: "60",
-        totalTitle: "20",
-        testTime: "15",
-        start_time: "2019-12-10",
-        end_time: "2019-12-30",
-        testContent: "政治常识测试"
       }
     };
   },
   methods: {
     goExam(){
       mpvue.reLaunch({
-        url:'../../my/examGo/main'
+        url:'../../my/examGo/main?id='+this.exam.Id
       })
     }
   },
@@ -98,8 +91,22 @@ export default {
       }
     });
   },
-  onLoad() {
+  onLoad(o) {
     let vm = this;
+    this.$api.$signGet('科目详情',{
+      id:o.id,
+      userid:mpvue.getStorageSync('userid')
+    }).then(res=>{
+      let stime = res.Data.ExamStartTime;
+      let etime = res.Data.ExamEndTime;
+      if(stime){
+        res.Data.ExamStartTime = stime.split(':')[0]+':'+stime.split(':')[1];
+      }
+      if(etime){
+        res.Data.ExamEndTime = etime.split(':')[0]+':'+etime.split(':')[1];
+      }
+      vm.exam = res.Data;
+    })
   }
 };
 </script>

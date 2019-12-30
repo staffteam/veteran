@@ -1,7 +1,7 @@
 <template>
   <div class="my-exam">
     <div class="top"><img src="/static/images/about-top.jpg" mode="widthFix"></div>
-    <div class="detail-content">
+    <div class="detail-content wxparse-mains">
       <wxParse :content="aboutusContent" />
     </div>
   </div>

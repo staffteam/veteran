@@ -16,7 +16,7 @@
     <div class="top-h"></div>
     <p class="detail-back"><img src="/static/images/detail-back.jpg" mode="widthFix"></p>
     <template v-for="item in tagData">
-      <div class="detail-content" :key="item.id" v-if="item.id == tagCheck">
+      <div class="detail-content wxparse-mains" :key="item.id" v-if="item.id == tagCheck">
         <wxParse :content="item.content" />
       </div>
     </template>

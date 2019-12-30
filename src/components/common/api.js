@@ -24,12 +24,18 @@ const path = {
   '视频课程详情': `${api}/Course/GetVedioCourseDetail`,
   '视频课程签到': `${api}/Course/VedioCourseSignIn`,
   '科目列表': `${api}/Exam/GetSubjectList`,
-  '科目详情': `${api}/Exam/GetSubjectDetail`
+  '科目详情': `${api}/Exam/GetSubjectDetail`,
+  '交卷': `${api}/Exam/SubmitExam`,
+  '公司列表': `${api}/Company/GetCompanyList`,
+  '职位列表': `${api}/Company/GetRecruitList`,
+  '老师根据日期获取签到状态': `${api}/Course/GetDateListByTeacher`,
+  '老师根据日期获取课程': `${api}/Course/GetCourseListByTeacher`
 };
 const load = {
   show() {
     mpvue.showLoading({
-      title: '请稍后...'
+      title: '请稍后...',
+      mask:true
     });
   },
   hide() {

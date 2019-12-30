@@ -1,15 +1,15 @@
 <template>
   <div class="recruitment-detail">
     <div class="top">
-      <h2 class="line">{{detail.title}}</h2>
+      <h2 class="line">{{detail.Detail.Name}}</h2>
       <div class="line">
         <p>
           <i class="iconfont icon-qizhi"></i>
-          {{detail.type}}
+          {{detail.Detail.NatureName}}
         </p>
         <p>
           <i class="iconfont icon-yewu"></i>
-          {{detail.service}}
+          {{detail.Detail.Business}}
         </p>
       </div>
     </div>
@@ -24,30 +24,31 @@
           >{{item.label}}</li>
         </ul>
       </div>
-      <div class="main-content" v-if="tagCheck==0">
-        <wxParse :content="detail.content" />
+      <div class="main-content wxparse-mains" v-if="tagCheck==0 && detail.Detail.Intro">
+        <wxParse :content="detail.Detail.Intro" />
       </div>
       <div class="main-join" v-if="tagCheck==1">
         <ul>
           <li
-            v-for="item in detail.join"
+            v-for="item in detail.RecruitList"
             :key="item.id"
             :class="item.check?'on':''"
             @click="joinTab(item)"
           >
             <div class="join-detail-t">
-              <h2 class="line">{{item.title}}</h2>
+              <h2 class="line">{{item.Title}}</h2>
               <i class="iconfont icon-you1"></i>
               <p>
-                <span>{{item.city}}</span>
-                <span>{{item.education}}</span>
+                <span>{{item.Areas}}</span>
+                <span>{{item.EducationName}}</span>
               </p>
             </div>
-            <div class="join-detail" v-if="item.check">
-              <h2>这是内容</h2>
+            <div class="join-detail wxparse-mains" v-if="item.check">
+                <wxParse :content="item.Content" />
             </div>
           </li>
         </ul>
+        <load-data :isLoading="isLoading" :isNotData="isNotData" />
       </div>
     </div>
   </div>
@@ -61,27 +62,64 @@ export default {
   },
   data() {
     return {
+      isLoading: false,
+      isNotData: false,
+      isGet: true,
+      pageNum: 1,
+      pageSize: 10,
       tagCheck: 0,
       tagData: [{ label: "公司介绍", id: "0" }, { label: "招聘岗位", id: "1" }],
       detail: {
-        title: "朗诚教育服务有限公司",
-        type: "事业单位",
-        service: "专业服务（资讯、人力资源）",
-        content:
-          "<p style='font-size:16px;'>宿迁市中胚食品有限公司于2012年11月06日在宿迁市宿城区市场监督管理局登记成立。法定代表人卜玉梅，公司经营范围包括其他粮食加工品(谷物碾磨加工品)分装，预包装食品批发与零售等。</p>",
-        join: [
-          { title: "市场营销", city: "深圳", education: "大专", id: 1 },
-          { title: "研发测试", city: "深圳", education: "大专", id: 2 },
-          { title: "技术支持", city: "深圳", education: "大专", id: 3 },
-          { title: "行政助理", city: "深圳", education: "大专", id: 4 }
-        ]
-      }
+        Detail:{},
+        RecruitList:[]
+      },
+      pid: ""
     };
   },
+  /**
+   * 页面上拉触底事件的处理函数
+   */
+  onReachBottom: function() {
+    let vm = this;
+    if (vm.isGet) {
+      vm.pageNum++;
+      vm.getData();
+    }
+  },
   methods: {
+    getData() {
+      let vm = this;
+      vm.isGet = false;
+      vm.isLoading = true;
+      vm.$api
+        .$signGet("职位列表", {
+          page: vm.pageNum,
+          companyId: vm.pid
+        })
+        .then(res => {
+          if (vm.pageNum == 1) {
+            vm.isGet = true;
+            vm.isLoading = false;
+            vm.detail = res.Data;
+          } else {
+            if (res.Data.RecruitList > 0) {
+              vm.isGet = true;
+              vm.isLoading = false;
+              vm.detail.RecruitList = [
+                ...vm.detail.RecruitList,
+                ...res.Data.RecruitList
+              ];
+            } else {
+              vm.isGet = false;
+              vm.isLoading = false;
+              vm.isNotData = true;
+            }
+          }
+        });
+    },
     joinTab(item) {
-      this.detail.join = this.detail.join.map(value => {
-        if (item.id == value.id) {
+      this.detail.RecruitList = this.detail.RecruitList.map(value => {
+        if (item.Id == value.Id) {
           value.check = !value.check;
         }
         return value;
@@ -101,8 +139,10 @@ export default {
       }
     });
   },
-  onLoad() {
+  onLoad(o) {
     let vm = this;
+    vm.pid = o.id;
+    vm.getData();
   }
 };
 </script>
@@ -180,35 +220,43 @@ export default {
       ul {
         li {
           border-bottom: 1px solid #e5e5e5;
-          .join-detail-t{
+          &.on{
+             .join-detail-t {
+               &>i{
+                 transform: rotate(90deg);
+               }
+             }
+          }
+          .join-detail-t {
             height: 104rpx;
             overflow: hidden;
             line-height: 103rpx;
             margin: 0 30rpx;
-            h2{
+            h2 {
               font-size: 32rpx;
               font-weight: 600;
               display: inline-block;
               width: 50%;
             }
-            p{
+            p {
               float: right;
-              span{
+              span {
                 font-size: 28rpx;
                 margin-left: 15rpx;
                 color: #999;
               }
             }
-            &>i{
+            & > i {
               display: block;
               float: right;
               font-size: 26rpx;
               color: #ccc;
               margin-left: 45rpx;
+              transition: 0.3s transform;
             }
           }
-          .join-detail{
-            padding:20rpx 30rpx;
+          .join-detail {
+            padding: 20rpx 30rpx;
             border-top: 1px solid #e5e5e5;
           }
         }

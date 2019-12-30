@@ -1,19 +1,19 @@
 <template>
   <div class="recruitment-list">
     <ul>
-      <li v-for="item in recruitmentListData" :key="item.id">
-        <a :href="'../../recruitment/detail/main?id='+item.id">
+      <li v-for="item in recruitmentListData" :key="item.Id">
+        <a :href="'../../recruitment/detail/main?id='+item.Id">
           <p>
-            <img :src="item.logo || '/static/images/recruitment-default.jpg'" mode="aspectFill" />
+            <img :src="item.Logo || '/static/images/recruitment-default.jpg'" mode="aspectFill" />
           </p>
           <div>
-            <h2 class="line">{{item.title}}</h2>
+            <h2 class="line">{{item.Name}}</h2>
             <p class="line">
-              <span>{{item.type}}</span>
-              <span>{{item.service}}</span>
+              <span>{{item.NatureName}}</span>
+              <span>{{item.Business}}</span>
             </p>
             <div>
-              <span v-for="(items,i) in item.keyword" :key="i">{{items}}</span>
+              <span v-for="(items,i) in item.RecruitLabels" :key="i">{{items}}</span>
             </div>
           </div>
         </a>
@@ -32,31 +32,7 @@ export default {
       isGet: true,
       pageNum: 1,
       pageSize: 10,
-      recruitmentListData: [
-        {
-          logo: "/static/images/recruitment-list.jpg",
-          title: "朗诚教育服务有限公司",
-          type: "民营公司",
-          service: "专业服务（资讯、人力资源）",
-          keyword: ["物流经理", "教学管理", "销售顾问"],
-          id: "1"
-        },
-        {
-          logo: "/static/images/recruitment-list.jpg",
-          title: "朗诚教育服务有限公司",
-          type: "民营公司",
-          service: "专业服务（资讯、人力资源）",
-          keyword: ["物流经理", "教学管理", "销售顾问"],
-          id: "2"
-        },
-        {
-          title: "朗诚教育服务有限公司",
-          type: "民营公司",
-          service: "专业服务（资讯、人力资源）",
-          keyword: ["物流经理", "教学管理", "销售顾问"],
-          id: "3"
-        }
-      ]
+      recruitmentListData: []
     };
   },
   /**
@@ -74,11 +50,19 @@ export default {
       let vm = this;
       vm.isGet = false;
       vm.isLoading = true;
-      setTimeout(_ => {
-        vm.isGet = false;
-        vm.isLoading = false;
-        vm.isNotData = true;
-      }, 1000);
+      vm.$api.$signGet('公司列表',{
+        page:vm.pageNum
+      }).then(res=>{
+        if(res.Data.length>0){
+          vm.isGet = true;
+          vm.isLoading = false;
+          vm.recruitmentListData = res.Data;
+        }else{
+          vm.isGet = false;
+          vm.isLoading = false;
+          vm.isNotData = true;
+        }
+      })
     }
   },
   onShow() {

@@ -10,11 +10,11 @@
         </p>
         <div>
           <h2>{{userInfo.Name}}</h2>
-          <p>{{userInfo.SquadronNo}}退役军人</p>
+          <p v-if="!userInfo.IsTeacher">{{userInfo.SquadronNo}}退役军人</p>
         </div>
       </div>
     </div>
-    <div class="member-top-list">
+    <div class="member-top-list" v-if="!userInfo.IsTeacher">
       <ul>
         <li>
           <a href="../my/exam/main">
@@ -28,7 +28,7 @@
         </li>
       </ul>
     </div>
-    <div class="member-main-list">
+    <div :class="'member-main-list '+(userInfo.IsTeacher?'teacher':'')">
       <h2>我的工具</h2>
       <scroll-view scroll-y="false" class="main-list">
         <ul>
@@ -41,7 +41,7 @@
               <i class="iconfont icon-you1"></i>
             </a>
             <div v-if="item.icon == 'icon-fenxiang'">
-              <button open-type='share' class="btn-share"></button>
+              <button open-type="share" class="btn-share"></button>
               <h2>
                 <i :class="'iconfont '+item.icon"></i>
                 {{item.title}}
@@ -66,7 +66,72 @@ export default {
   data() {
     return {
       userInfo: {},
-      memberListData: [
+      memberListData: []
+    };
+  },
+  methods: {
+    errorImg() {
+      this.userInfo.Image = "/static/images/top.png";
+    },
+    outLogin() {
+      mpvue.removeStorageSync("userInfo");
+      mpvue.removeStorageSync("userid");
+      mpvue.switchTab({
+        url: "../index/main"
+      });
+    }
+  },
+  onShow() {
+    mpvue.setNavigationBarColor({
+      frontColor: "#ffffff",
+      backgroundColor: "#E53330",
+      animation: {
+        duration: 400,
+        timingFunc: "easeIn"
+      }
+    });
+  },
+  onShareAppMessage: function() {
+    return {
+      title: "军戎飞扬",
+      desc: "军戎飞扬",
+      path: "/pages/index/main",
+      imageUrl: "/static/images/about-top.jpg"
+    };
+  },
+  onLoad() {
+    let vm = this;
+    let userInfo = mpvue.getStorageSync("userInfo");
+    vm.userInfo = userInfo;
+    if (userInfo.IsTeacher) {
+      vm.memberListData = [
+        {
+          url: "../my/aboutus/main",
+          icon: "icon-guanyu",
+          title: "关于我们",
+          id: "1"
+        },
+        {
+          url: "",
+          icon: "icon-fenxiang",
+          title: "分享好友",
+          id: "2"
+        },
+        {
+          url: "../my/feedback/main",
+          icon: "icon-fankui",
+          title: "意见反馈",
+          id: "3"
+        },
+        {
+          url: "../my/help/main",
+          icon: "icon-bangzhuzhongxin",
+          title: "帮助中心",
+          id: "4"
+        }
+      ];
+    } else {
+      vm.memberListData = [
         {
           url: "../my/diploma/main",
           icon: "icon-jieyezhengshu",
@@ -97,43 +162,8 @@ export default {
           title: "帮助中心",
           id: "4"
         }
-      ]
-    };
-  },
-  methods: {
-    errorImg(){
-      this.userInfo.Image = '/static/images/top.png';
-    },
-    outLogin() {
-      mpvue.removeStorageSync("userInfo");
-      mpvue.removeStorageSync("userid");
-      mpvue.switchTab({
-        url: "../index/main"
-      });
+      ];
     }
-  },
-  onShow() {
-    mpvue.setNavigationBarColor({
-      frontColor: "#ffffff",
-      backgroundColor: "#E53330",
-      animation: {
-        duration: 400,
-        timingFunc: "easeIn"
-      }
-    });
-  },
-  onShareAppMessage: function () {
-    return {
-      title: '军戎飞扬',
-      desc: '军戎飞扬',
-      path: '/pages/index/main',
-      imageUrl:'/static/images/about-top.jpg'
-    }
-  },
-  onLoad() {
-    let vm = this;
-    let userInfo = mpvue.getStorageSync("userInfo");
-    vm.userInfo = userInfo;
   }
 };
 </script>
@@ -210,6 +240,9 @@ export default {
   }
   .member-main-list {
     border-top: 20rpx solid #f7f7f7;
+    &.teacher{
+      border-top: 0;
+    }
     & > h2 {
       font-size: 36rpx;
       color: rgba(51, 51, 51, 1);
@@ -223,11 +256,11 @@ export default {
           height: 103rpx;
           border-bottom: 1rpx solid #e5e5e5;
           margin: 0 32rpx;
-          &>div{
+          & > div {
             position: relative;
             width: 100%;
             height: 100%;
-            button{
+            button {
               position: absolute;
               left: 0;
               top: 0;
@@ -236,6 +269,10 @@ export default {
               z-index: 9;
               opacity: 0;
             }
+          }
+          a {
+            display: block;
+            height: 100%;
           }
           h2 {
             float: left;

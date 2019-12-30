@@ -11,7 +11,7 @@
       <div class="li" @click="recommendClick(item.id)" v-for="item in recommendData" :key="item.id">
         <div class="t">{{item.title}}</div>
         <i :class="'iconfont icon-you1 ' + (item.on?'on':'')"></i>
-        <div :class="'desc '+ (item.on?'on':'')">
+        <div :class="'desc wxparse-mains '+ (item.on?'on':'')">
           <wxParse :content="item.content" />
         </div>
       </div>

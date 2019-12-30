@@ -1,40 +1,43 @@
 <template>
-  <div class="my-exam">
-    <ul>
-      <li v-for="item in examListData" :key="item.id" :class="item.qualified?'on':''">
-        <a :href="!item.qualified?'../../my/examDetail/main':''">
-          <div class="l">
-            <p>
-              <img src="/static/images/exam-back.png" mode="widthFix" />
-            </p>
-            <h2>{{item.type}}</h2>
-          </div>
-          <div class="c">
-            <h2 class="line">{{item.title}}</h2>
-            <p>
-              <span
-                v-if="!item.qualified && item.examNum!=undefined && item.examNum!=null"
-              >提示：还有{{item.examNum}}次考试机会</span>
-            </p>
-            <div>
-              <p v-if="item.score!=undefined && item.score!=null">
-                成绩
-                <span>{{item.score}}</span>
+  <div>
+    <div class="my-exam">
+      <ul v-if="examListData.length>0">
+        <li v-for="item in examListData" :key="item.id" :class="item.IsPass?'on':''">
+          <a :href="item.StudentCount>0 && !item.IsPass?('../../my/examDetail/main?id='+item.Id):''">
+            <div class="l">
+              <p>
+                <img :src="item.Image || '/static/images/exam-back.png'" mode="aspectFill" />
               </p>
-              <p v-if="item.score==undefined || item.score==null">未考试</p>
-              <span>
-                进入考试
-                <i class="iconfont icon-you1"></i>
-              </span>
+              <!-- <h2>{{item.Name}}</h2> -->
             </div>
-          </div>
-          <div class="qualified" v-if="item.qualified">
-            <img src="/static/images/qualified.png" mode="widthFix" />
-          </div>
-        </a>
-      </li>
-    </ul>
-    <load-data :isLoading="isLoading" :isNotData="isNotData" />
+            <div class="c">
+              <h2 class="line">{{item.Name}}</h2>
+              <p>
+                <span v-if="item.StudentCount!=null">提示：还有{{item.StudentCount}}次考试机会</span>
+              </p>
+              <div>
+                <p v-if="item.UserScore!=null">
+                  成绩
+                  <span>{{item.UserScore}}</span>
+                </p>
+                <p v-if="item.UserScore==null">未考试</p>
+                <span>
+                  进入考试
+                  <i class="iconfont icon-you1"></i>
+                </span>
+              </div>
+            </div>
+            <div class="qualified" v-if="item.IsPass">
+              <img src="/static/images/qualified.png" mode="widthFix" />
+            </div>
+          </a>
+        </li>
+      </ul>
+      <div class="not-exam" v-if="examListData.length==0">
+        <img src="/static/images/not-exam.jpg" mode="widthFix">
+      </div>
+    </div>
+    <load-data v-if="examListData.length>0" :isLoading="isLoading" :isNotData="isNotData" />
   </div>
 </template>
 
@@ -47,52 +50,32 @@ export default {
       isGet: true,
       pageNum: 1,
       pageSize: 10,
-      examListData: [
-        {
-          id: 0,
-          qualified: true,
-          type: "政治",
-          title: "政治常识科目测试",
-          score: "97"
-        },
-        {
-          id: 1,
-          qualified: false,
-          type: "物理",
-          title: "政治常识科目测试",
-          score: "47",
-          examNum: 3
-        },
-        {
-          id: 2,
-          qualified: null,
-          type: "化学",
-          title: "政治常识科目测试",
-          score: null
-        }
-      ]
+      examListData: []
     };
   },
   /**
    * 页面上拉触底事件的处理函数
    */
-  onReachBottom: function() {
-    let vm = this;
-    if (vm.isGet) {
-      vm.pageNum++;
-      vm.getData();
-    }
-  },
+  // onReachBottom: function() {
+  //   let vm = this;
+  //   if (vm.isGet) {
+  //     vm.pageNum++;
+  //     vm.getData();
+  //   }
+  // },
   methods: {
     getData() {
       let vm = this;
       vm.isGet = false;
-      vm.isLoading = true;
-      setTimeout(_ => {
-        vm.isGet = false;
-        vm.isLoading = false;
-        vm.isNotData = true;
-      }, 1000);
+      vm.isLoading = false;
+      vm.isNotData = true;
+      vm.$api
+        .$signGet("科目列表", {
+          userid: mpvue.getStorageSync("userid")
+        })
+        .then(res => {
+          vm.examListData = res.Data;
+        });
     }
   },
   onShow() {
@@ -114,6 +97,19 @@ export default {
 
 <style lang="less" scoped>
 .my-exam {
+  min-height: calc(~"100vh - 180rpx");
+  .not-exam{
+    width: 100%;
+    height: 100vh;
+    img{
+      max-width:30%;
+      position: relative;
+      display: block;
+      margin: 0 auto;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+  }
   ul {
     li {
       margin: 30rpx;
@@ -142,8 +138,12 @@ export default {
           position: relative;
           float: left;
           p {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
             img {
               width: 100%;
+              height: 100%;
             }
           }
           h2 {

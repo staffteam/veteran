@@ -1,41 +1,37 @@
 <template>
   <div class="exam-go">
     <div class="exam-go-top">
-      <h2>{{exam.testContent}}</h2>
+      <h2>{{exam.Content}}</h2>
       <div>
-        <p :class="warn?'on':''" v-if="!isAnalysis">
-          <i class="iconfont icon-jiancepingtaizhuijia_shijian"></i>
-          {{countDown.h+':'+countDown.m+':'+countDown.s}}
-        </p>
         <p>
           <i class="iconfont icon-timu"></i>
-          {{examinationNum}}/{{exam.totalTitle}}
+          {{examinationNum}}/{{exam.TopicCount}}
         </p>
       </div>
     </div>
     <div class="exam-go-top-h"></div>
-    <template v-for="(item,index) in examListData">
-      <div class="exam-go-main" :key="item.id" v-if="(index+1) == examinationNum">
+    <template v-for="(item,index) in exam.TopicList">
+      <div class="exam-go-main" :key="item.Id" v-if="(index+1) == examinationNum">
         <div class="title">
-          <span>{{item.radio?'(单选题)':'(多选题)'}}</span>
-          {{item.title}}
+          <span>{{!item.IsMultiple?'(单选题)':'(多选题)'}}</span>
+          {{item.Title}}
         </div>
         <div class="check-list">
           <ul>
             <li
-              v-for="(items,i) in item.options"
-              :class="items.success?'success':items.check?'error':''"
-              :key="items.id"
+              v-for="(items,i) in item.OptionList"
+              :class="items.IsRight?'success':items.check?'error':''"
+              :key="items.Id"
             >
-              <p>{{optionsArr[i]}}</p>
-              <h2>{{items.title}}</h2>
+              <p>{{items.optionIndex}}</p>
+              <h2>{{items.optionText}}</h2>
             </li>
           </ul>
         </div>
         <div class="exam-go-analysis">
           <h2>题目解析</h2>
           <p>正确答案：{{item.success}}</p>
-          <div>解析：{{item.analysis}}</div>
+          <div>解析：{{item.Explain}}</div>
         </div>
       </div>
     </template>
@@ -54,82 +50,13 @@ export default {
     return {
       isFirst: true,
       isFinish: false,
-      optionsArr: ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K"],
       commonMsg: false,
-      exam: {
-        testContent: "政治常识科目",
-        totalTitle: "2",
-        testTime: "30"
-      },
-      countDown: {
-        h: "00",
-        m: "00",
-        s: "00"
-      },
+      exam: {},
+      examPrams: [],
       examinationNum: 1,
       overtime: false,
       warn: false,
-      examListData: [
-        {
-          id: "1",
-          radio: true,
-          title:
-            "金秋时节农民采摘柿子时，最后总要在树上留一些熟透的柿子。果农说，这是留给喜鹊的食物。每到冬天，喜鹊都在果树上筑过冬，到春天也不飞走，整天忙着捕捉果树上的虫子，从而保证了来年柿子的丰收。关于这一事例留给我们的启示，错误的表述是( )",
-          success: "A",
-          analysis:
-            "这是一段文字解析这是一段文字解析这是一段文字解析这是一段文字解析这是一段文字解析这是一段文字解析这是一段文字解析这是一段文字解析这是一段文字解析这是一段文字解析这是一段文字解析这是一段文字解析这是一段文字解析这是一段文字解析",
-          options: [
-            {
-              id: "1_1",
-              title: "事物之间有其固有的联系 ",
-              check: true,
-              success: true
-            },
-            {
-              id: "1_2",
-              title: "人与自然的关系是相互利用的关系 "
-            },
-            {
-              id: "1_3",
-              title: "人们可以发现并利用规律来实现自己的目的 "
-            },
-            {
-              id: "1_4",
-              title: "保持生态系统的平衡是人类生存发展的必要条件发展的必要条件 "
-            }
-          ]
-        },
-        {
-          id: "2",
-          radio: true,
-          title:
-            "2金秋时节农民采摘柿子时，最后总要在树上留一些熟透的柿子。果农说，这是留给喜鹊的食物。每到冬天，喜鹊都在果树上筑过冬，到春天也不飞走，整天忙着捕捉果树上的虫子，从而保证了来年柿子的丰收。关于这一事例留给我们的启示，错误的表述是( )",
-          success: "B",
-          analysis:
-            "这是一段文字解析这是一段文字解析这是一段文字解析这是一段文字解析这是一段文字解析这是一段文字解析这是一段文字解析这是一段文字解析这是一段文字解析这是一段文字解析这是一段文字解析这是一段文字解析这是一段文字解析这是一段文字解析",
-          options: [
-            {
-              id: "2_1",
-              title: "事物之间有其固有的联系 ",
-              check: true,
-              error: true
-            },
-            {
-              id: "2_2",
-              title: "人与自然的关系是相互利用的关系 ",
-              success: true
-            },
-            {
-              id: "2_3",
-              title: "人们可以发现并利用规律来实现自己的目的 "
-            },
-            {
-              id: "2_4",
-              title: "保持生态系统的平衡是人类生存发展的必要条件 "
-            }
-          ]
-        }
-      ],
+      examListData: [],
       checks: {},
       isAnalysis: false
     };
@@ -145,8 +72,8 @@ export default {
       }
     },
     nextGo() {
-      if (+this.exam.totalTitle > this.examinationNum) {
-        if (+this.exam.totalTitle - 1 == this.examinationNum) {
+      if (+this.exam.TopicCount > this.examinationNum) {
+        if (+this.exam.TopicCount - 1 == this.examinationNum) {
           this.isFinish = true;
         }
         this.isFirst = false;
@@ -170,12 +97,75 @@ export default {
     });
   },
   onLoad(o) {
+    let vm = this;
+    vm.isFirst = true;
+    vm.isFinish = false;
+    vm.commonMsg = false;
+    vm.examinationNum = 1;
+    vm.overtime = false;
+    vm.warn = false;
+    vm.isAnalysis = false;
     //全部题目解析
     if (o.analysis == "all") {
-      this.isAnalysis = "all";
+      vm.isAnalysis = "all";
     } else {
-      this.isAnalysis = "err";
+      vm.isAnalysis = "err";
     }
+    vm.examPrams = mpvue.getStorageSync("examPrams");
+    let examJson = {},
+      examErr = {};
+    vm.examPrams.ExamDetails.forEach(value => {
+      let _arr = value.SubjectOptionId.split(",");
+      examJson[value.SubjectTopicId] = {};
+      _arr.forEach(value2 => {
+        examJson[value.SubjectTopicId][value2] = true;
+      });
+    });
+    vm.examPrams.examResultList.forEach(value => {
+      examErr[value.Id] = value.IsRight;
+    });
+    vm.$api
+      .$signGet("科目详情", {
+        id: vm.examPrams.SubjectId,
+        userid: mpvue.getStorageSync("userid")
+      })
+      .then(res => {
+        vm.exam = res.Data;
+        vm.exam.TopicList = vm.exam.TopicList.map(value => {
+          value.OptionList = value.OptionList.map(value2 => {
+            value2.check = examJson[value.Id][value2.Id];
+            value2.optionIndex = value2.Content.split("：")[0];
+            value2.optionText = value2.Content.split("：")[1];
+            if (value2.IsRight) {
+              if (value.success) {
+                value.success = value.success + "," + value2.optionIndex;
+              } else {
+                value.success = value2.optionIndex;
+              }
+            }
+            return value2;
+          });
+          return value;
+        });
+        vm.exam.TopicList = vm.exam.TopicList.filter(value => {
+          //判断考题解析是否是全部考题解析
+          if (vm.isAnalysis == "all") {
+            return true;
+          } else {
+            //只解析错误考题
+            if (examErr[value.Id] === false) {
+              return true;
+            } else {
+              return false;
+            }
+          }
+        });
+        vm.exam.TopicCount = vm.exam.TopicList.length;
+        if (+vm.exam.TopicCount == vm.examinationNum) {
+          vm.isFinish = true;
+        }
+        console.log(vm.exam.TopicList);
+      });
   }
 };
 </script>
@@ -287,12 +277,12 @@ export default {
       border-radius: 1px;
       margin-top: 70rpx;
       padding: 32rpx;
-      h2{
+      h2 {
         font-size: 34rpx;
         line-height: 48rpx;
         padding-left: 26rpx;
         position: relative;
-        &:before{
+        &:before {
           content: "";
           display: block;
           position: absolute;
@@ -302,15 +292,15 @@ export default {
           width: 10rpx;
           height: 10rpx;
           border-radius: 50%;
-          background-color: #FF8915;
+          background-color: #ff8915;
         }
       }
-      p{
+      p {
         margin-top: 30rpx;
         font-size: 30rpx;
         color: #666;
       }
-      div{
+      div {
         margin-top: 15rpx;
         font-size: 30rpx;
         line-height: 42rpx;

@@ -27,7 +27,7 @@
         <div
           v-for="item in endDay"
           :key="item.id"
-          :class="(isSignInData[item.num+1]===undefined?'':isSignInData[item.num+1]?'already-sign':'not-sign')+' '+(staySignInData[item.num+1]?'the':'')+' '+(theDay == item.num+1?'on':'')"
+          :class="(isSignInData[item.num+1]===undefined?'':isSignInData[item.num+1]?'already-sign':'not-sign')+' '+(isOutTime[item.num+1]===undefined?'':isOutTime[item.num+1]?'out-time':'the-time')+' '+(staySignInData[item.num+1]?'the':'')+' '+(theDay == item.num+1?'on':'')"
           @click="getTheDay(item.num+1,staySignInData[item.num+1])"
         >
           <p>{{item.num+1}}</p>
@@ -36,24 +36,36 @@
     </div>
     <scroll-view scroll-y="true" class="sign-in-content">
       <ul v-if="signInListData.length>0">
-        <li v-for="(item,index) in signInListData" :key="index" :class="(item.IsSignIn?'on':theisLater?'later':'off')">
+        <li
+          v-for="(item,index) in signInListData"
+          :key="index"
+          :class="(isAdmin?(item.isStart?'on':item.isEnd?'off':'later'):(item.IsSignIn?'on':theisLater?'later':'off'))"
+        >
           <div class="time">{{item.SignInTime+'-'+item.SignOutTime}}</div>
           <div class="content">
-            <a :href="!isAdmin?'../../sign/detail/main?id='+item.Id:'../../sign/admin/main?id='+item.Id">
+            <a
+              :href="!isAdmin?'../../sign/detail/main?id='+item.Id:'../../sign/admin/main?id='+item.Id"
+            >
               <div class="l">
                 <h2>{{item.Title}}</h2>
                 <p>{{item.Address}}</p>
               </div>
-              <div class="r">
+              <div class="r" v-if="!isAdmin">
                 <p v-if="item.IsSignIn">已签到</p>
                 <p v-if="!item.IsSignIn && theisLater">待签到</p>
                 <p v-if="!item.IsSignIn  && !theisLater">未签到</p>
+              </div>
+              <div class="r" v-if="isAdmin">
+                <p v-if="item.isStart">开始签到</p>
+                <p v-if="!item.isStart && !item.isEnd">未开始</p>
+                <p v-if="!item.isStart && item.isEnd">结束签到</p>
               </div>
             </a>
           </div>
         </li>
       </ul>
       <div class="notdata" v-if="signInListData.length==0">- 暂无课程数据 -</div>
+      <!-- <load-data v-if="signInListData.length>0" :isLoading="isLoading" :isNotData="isNotData" /> -->
     </scroll-view>
   </div>
 </template>
@@ -66,6 +78,11 @@ export default {
   },
   data() {
     return {
+      isLoading: false,
+      isNotData: false,
+      isGet: true,
+      pageNum: 1,
+      pageSize: 10,
       signInDate: "",
       signInContent: "",
       firstDay: [],
@@ -79,10 +96,19 @@ export default {
       isSignInData: {},
       staySignInData: {},
       theMonth: "",
-      theisLater:false
+      theisLater: false,
+      isOutTime: {},
+      signInListDay: ""
     };
   },
   methods: {
+    reachBottom() {
+      let vm = this;
+      if (vm.isGet) {
+        vm.pageNum++;
+        vm.getData(vm.signInListDay);
+      }
+    },
     prevDate() {
       let { year, month } = this.dateObj;
       if (month == 1) {
@@ -147,52 +173,108 @@ export default {
     },
     getData(day) {
       let vm = this;
+      this.signInListDay = day;
       this.$api
-        .$signGet("根据日期获取课程", {
+        .$signGet(vm.isAdmin ? "老师根据日期获取课程" : "根据日期获取课程", {
           date: vm.theMonth + "-" + day,
-          page: 1,
           userid: mpvue.getStorageSync("userid")
         })
         .then(res => {
-          if (res.Data) {
-            vm.signInListData = res.Data.map(value=>{
-              let _arr1 = value.SignInTime.split(':');
-              value.SignInTime = `${_arr1[0]}:${_arr1[1]}`
-              let _arr2 = value.SignOutTime.split(':');
-              value.SignOutTime = `${_arr2[0]}:${_arr2[1]}`
+          if (res.Data.length > 0) {
+            let theDate = new Date();
+            vm.signInListData = res.Data.map(value => {
+              let _arr1 = value.SignInTime.split(":");
+              value.SignInTime = `${_arr1[0]}:${_arr1[1]}`;
+              let _arr2 = value.SignOutTime.split(":");
+              value.SignOutTime = `${_arr2[0]}:${_arr2[1]}`;
+              //判断是否是老师
+              if (vm.isAdmin) {
+                //获取签到精准时间
+                let signTime = new Date(
+                  `${value.StartTime.split(" ")[0]} ${value.SignInTime}`
+                );
+                let outTime = new Date(
+                  `${value.StartTime.split(" ")[0]} ${value.SignOutTime}`
+                );
+                let reservedTime = +value.ReservedTime * 60 * 1000;
+                if (signTime.getTime() - theDate.getTime() > reservedTime) {
+                  //上课签到时间大于当前时间，未开始
+                  value.isStart = false;
+                  value.isEnd = false;
+                } else if (
+                  outTime.getTime() - theDate.getTime() >
+                  -reservedTime
+                ) {
+                  //下课签到时间大于当前时间，开始签到
+                  value.isStart = true;
+                  value.isEnd = false;
+                } else {
+                  //超出下课时间，结束
+                  value.isStart = false;
+                  value.isEnd = true;
+                }
+              }
               return value;
             });
           }
         });
     },
-    getTheDay(day,isLater) {
+    getTheDay(day, isLater) {
       this.theDay = day;
-      this.theisLater = isLater?true:false;
+      this.theisLater = isLater ? true : false;
       this.getData(day);
     },
     getDataLog(date) {
       let vm = this;
       this.$api
-        .$signGet("根据日期获取签到状态", {
-          date: date,
-          userid: mpvue.getStorageSync("userid")
-        })
+        .$signGet(
+          vm.isAdmin ? "老师根据日期获取签到状态" : "根据日期获取签到状态",
+          {
+            date: date,
+            userid: mpvue.getStorageSync("userid")
+          }
+        )
         .then(res => {
-          vm.courseData = res.Data;
-          let _json = {},
-            stayJson = {};
-          let theDate = new Date();
-          vm.courseData.forEach(value => {
-            //获取日期中的天数
-            let day = value.Date.split(" ")[0].split("-")[2];
-            _json[day] = value.IsSignIn;
-            let _date = new Date(value.Date);
-            if (_date.getTime() - theDate.getTime() > 0) {
-              stayJson[day] = true;
-            }
-          });
-          vm.staySignInData = stayJson;
-          vm.isSignInData = _json;
+          if (!vm.isAdmin) {
+            vm.courseData = res.Data;
+            let _json = {},
+              stayJson = {};
+            let theDate = new Date();
+            vm.courseData.forEach(value => {
+              //获取日期中的天数
+              let day = value.Date.split(" ")[0].split("-")[2];
+              _json[day] = value.IsSignIn;
+              let _date = new Date(value.Date);
+              if (_date.getTime() - theDate.getTime() > 0) {
+                stayJson[day] = true;
+              }
+            });
+            vm.staySignInData = stayJson;
+            vm.isSignInData = _json;
+          } else {
+            vm.courseData = res.Data;
+            let _json = {},
+              stayJson = {};
+            let theDate = new Date();
+            vm.courseData.forEach(value => {
+              let day = value.split(" ")[0].split("-")[2];
+              let _date = new Date(value);
+              let _the = `${theDate.getFullYear()}-${theDate.getMonth() +
+                1}-${theDate.getDate()}`;
+              if (_the == value) {
+                //当天
+                _json[day] = false;
+              } else {
+                if (_date.getTime() - theDate.getTime() > 0) {
+                  stayJson[day] = true;
+                } else {
+                  _json[day] = true;
+                }
+              }
+            });
+            vm.staySignInData = stayJson;
+            vm.isOutTime = _json;
+          }
         });
     }
   },
@@ -284,14 +366,30 @@ export default {
         position: relative;
         &.on {
           p {
+            border: 1px solid #e53330 !important;
             background-color: #e53330;
             color: white !important;
+          }
+          &:before {
+            display: none;
           }
         }
         &.the {
           p {
             border: 1px solid #e53330;
             color: #e53330;
+          }
+        }
+        &.out-time {
+          p {
+            border: 1px solid #999;
+            color: #999;
+          }
+        }
+        &.the-time {
+          p {
+            border: 1px solid #51c512;
+            color: #51c512;
           }
         }
         &.already-sign {
@@ -351,15 +449,15 @@ export default {
             }
           }
         }
-        &.later{
+        &.later {
           .time {
             &:before {
-              background: #FF8915;
+              background: #ff8915;
             }
           }
           .content {
             .r {
-              color: #FF8915;
+              color: #ff8915;
             }
           }
         }

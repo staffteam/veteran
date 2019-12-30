@@ -4,12 +4,12 @@
     <div class="sign-in-info">
       <div class="title">
         <i class="iconfont icon-kecheng"></i>
-        <h2 class="lines">{{info.title}}</h2>
+        <h2 class="lines">{{info.Cource.Title}}</h2>
       </div>
-      <div class="name">指导老师：{{info.teacher}}</div>
+      <div class="name">指导老师：{{info.Cource.TeacherName}}</div>
       <div class="locate">
         <i class="iconfont icon-dingweiweizhi"></i>
-        <h2>{{info.locate}}</h2>
+        <h2>{{info.Cource.Address}}</h2>
       </div>
     </div>
     <div class="sign-in-content">
@@ -30,42 +30,43 @@
         </p>
       </div>
       <div class="list-main">
-        <scroll-view scroll-y="true" class="sign-in-list">
-          <ul>
-            <li v-for="item in userData" :key="item.id">
-              <div class="top">
-                <img :src="item.top_url" mode="widthFix" />
-              </div>
-              <div class="center">
-                <h2 class="center-title">{{item.name}}</h2>
-                <div class="center-sign">
-                  <div>
-                    <h2>进场签到</h2>
-                    <p :class="item.isStartSign?'on':''">{{item.isStartSign?'已签到':'未签到'}}</p>
-                  </div>
-                  <div>
-                    <h2>进场签到</h2>
-                    <p :class="item.isEndSign?'on':''">{{item.isEndSign?'已签到':'未签到'}}</p>
-                  </div>
+        <ul>
+          <li v-for="item in userData" :key="item.id">
+            <div class="top">
+              <img :src="item.Image" mode="widthFix" />
+              <!-- {{item.ShortName}} -->
+            </div>
+            <div class="center">
+              <h2 class="center-title">{{item.Name}}</h2>
+              <div class="center-sign">
+                <div>
+                  <h2>进场签到</h2>
+                  <p :class="item.SignInStatus?'on':''">{{item.SignInStatus?'已签到':'未签到'}}</p>
+                </div>
+                <div>
+                  <h2>进场签到</h2>
+                  <p :class="item.SignOutStatus?'on':''">{{item.SignOutStatus?'已签到':'未签到'}}</p>
                 </div>
               </div>
-              <div class="btn">
-                <!-- 下课未签到 -->
-                <p v-if="!item.isEndSign" class="readonly">确认签到</p>
-                <!-- 上课已签到，下课已签到 -->
-                <p
-                  v-if="item.isStartSign && item.isEndSign && !item.finish"
-                  class="on"
-                  @click="goSign(item)"
-                >确认签到</p>
-                <!-- 上课已签到，下课已签到，已确认签到 -->
-                <p v-if="item.isStartSign && item.isEndSign && item.finish" class="off">已确认</p>
-              </div>
-            </li>
-          </ul>
-        </scroll-view>
+            </div>
+            <div class="btn">
+              <!-- 下课未签到 -->
+              <p v-if="!item.SignOutStatus" class="readonly">确认签到</p>
+              <!-- 上课已签到，下课已签到 -->
+              <p
+                v-if="item.SignInStatus && item.SignOutStatus && !item.IsConfirm"
+                class="on"
+                @click="goSign(item)"
+              >确认签到</p>
+              <!-- 上课已签到，下课已签到，已确认签到 -->
+              <p v-if="item.SignInStatus && item.SignOutStatus && item.IsConfirm" class="off">已确认</p>
+            </div>
+          </li>
+        </ul>
+        <load-data :isLoading="isLoading" :isNotData="isNotData" />
       </div>
     </div>
+    <div class="sign-btn-h"></div>
     <div class="sign-in-btn" @click="allSign()">一键确认签到</div>
   </div>
 </template>
@@ -74,100 +75,142 @@
 export default {
   data() {
     return {
-      info: {
-        title: "",
-        teacher: "",
-        locate: ""
-      },
-      signData: [
-        {
-          title: "参与人数",
-          num: "300",
-          id: 0
-        },
-        {
-          title: "已签到",
-          num: "230",
-          id: 1
-        },
-        {
-          title: "未签到",
-          num: "70",
-          id: 2
-        }
-      ],
-      userData: [
-        {
-          top_url: "/static/images/top.png",
-          name: "李秀兰",
-          isStartSign: false,
-          isEndSign: false,
-          finish: false,
-          id: 0
-        },
-        {
-          top_url: "/static/images/top.png",
-          name: "李秀兰",
-          isStartSign: true,
-          isEndSign: false,
-          finish: false,
-          id: 1
-        },
-        {
-          top_url: "/static/images/top.png",
-          name: "李秀兰",
-          isStartSign: true,
-          isEndSign: true,
-          finish: false,
-          id: 2
-        },
-        {
-          top_url: "/static/images/top.png",
-          name: "李秀兰",
-          isStartSign: true,
-          isEndSign: true,
-          finish: true,
-          id: 3
-        }
-      ],
+      isLoading: false,
+      isNotData: false,
+      isGet: true,
+      pageNum: 1,
+      pageSize: 10,
+      info: { Cource: {} },
+      signData: [],
+      userData: [],
       userDataHost: [],
-      searchVal: ""
+      searchVal: "",
+      pid: "",
+      userInfo: {}
     };
   },
+  /**
+   * 页面上拉触底事件的处理函数
+   */
+  onReachBottom: function() {
+    let vm = this;
+    if (vm.isGet) {
+      vm.pageNum++;
+      vm.getData();
+    }
+  },
   methods: {
+    getData() {
+      let vm = this;
+      vm.isGet = false;
+      vm.isLoading = true;
+      vm.$api
+        .$signGet("老师查看课程签到列表", {
+          id: vm.pid,
+          page: vm.pageNum
+        })
+        .then(res => {
+          if (res.Data.length > 0) {
+            vm.isGet = true;
+            vm.isLoading = false;
+            vm.userData = [...vm.userData, ...res.Data];
+            vm.userDataHost = [...vm.userData, ...res.Data];
+          } else {
+            vm.isGet = false;
+            vm.isLoading = false;
+            vm.isNotData = true;
+          }
+        });
+    },
     getSignInfo() {
       let vm = this;
-      let data = {
-        locate: "深圳市坂田街道微谷c座大厦",
-        title:
-          "信息办与基础工作安排培训课程工作安排培训课程工作安排培训课程工作安排培训课程工作安排培训",
-        teacher: "刘毅"
-      };
-      this.info = {
-        title: data.title,
-        teacher: data.teacher,
-        locate: data.locate
-      };
-      this.userDataHost = this.userData;
+      vm.$api
+        .$signGet("老师查看课程", {
+          id: vm.pid,
+          userid: mpvue.getStorageSync("userid")
+        })
+        .then(res => {
+          vm.info = res.Data;
+          vm.signData = [
+            {
+              title: "参与人数",
+              num: res.Data.Total,
+              id: 0
+            },
+            {
+              title: "已签到",
+              num: res.Data.SignInCount,
+              id: 1
+            },
+            {
+              title: "未签到",
+              num: res.Data.NoSignInCount,
+              id: 2
+            }
+          ];
+        });
     },
     allSign() {
+      let vm = this;
+      let is = true;
       this.userData = this.userData.map(value => {
-        value.finish = true;
-        return value;
-      });
-    },
-    goSign(item) {
-      this.userData = this.userData.map(value => {
-        if (item.id == value.id) {
-          value.finish = true;
+        if (!value.IsConfirm) {
+          is = false;
         }
         return value;
       });
+      if (is) {
+        mpvue.showToast({
+          title: "没有可签到的人员",
+          icon: "none"
+        });
+      } else {
+        vm.$api
+          .$signGet("老师一键确认签到", {
+            args: {
+              id: vm.pid,
+              userid: mpvue.getStorageSync("userid")
+            }
+          })
+          .then(res => {
+            mpvue.showToast({
+              title: "确认签到成功",
+              icon: "success"
+            });
+            vm.userData = this.userData.map(value => {
+              value.IsConfirm = true;
+              return value;
+            });
+          });
+      }
+    },
+    goSign(item) {
+      let vm = this;
+      vm.$api
+        .$signGet("老师确认签到", {
+          args: {
+            id: vm.pid,
+            userid: mpvue.getStorageSync("userid"),
+            stuid: item.Id
+          }
+        })
+        .then(res => {
+          mpvue.showToast({
+            title: "确认签到成功",
+            icon: "success"
+          });
+          vm.userData = this.userData.map(value => {
+            if (item.Id == value.Id) {
+              value.IsConfirm = true;
+            }
+            return value;
+          });
+        });
     },
     searchSubmit() {
       let vm = this;
       this.userData = this.userDataHost.filter(value => {
-        return value.name.indexOf(vm.searchVal) >= 0;
+        return value.Name.indexOf(vm.searchVal) >= 0;
       });
     }
   },
@@ -180,10 +223,13 @@ export default {
         timingFunc: "easeIn"
       }
     });
-    this.getSignInfo();
   },
-  onLoad() {
+  onLoad(o) {
     let vm = this;
+    vm.pid = o.id;
+    vm.userInfo = mpvue.getStorageSync("userInfo");
+    vm.getSignInfo();
+    vm.getData();
   }
 };
 </script>
@@ -194,7 +240,7 @@ export default {
   background-color: #f7f7f7;
   padding-top: 20rpx;
   .sign-in-top {
-    position: fixed;
+    position: absolute;
     top: 0;
     left: 0;
     width: 100%;
@@ -236,6 +282,7 @@ export default {
       font-size: 28rpx;
       color: #999999;
       line-height: 35rpx;
+      height: 35rpx;
       i {
         float: left;
         display: block;
@@ -250,12 +297,12 @@ export default {
   .sign-in-content {
     position: relative;
     z-index: 9;
-    margin: 20rpx 0;
-    height: calc(~"100vh - 400rpx");
+    margin: 20rpx 32rpx;
+    min-height: calc(~"100vh - 400rpx");
     background-color: white;
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
     border-radius: 10rpx;
-    padding: 46rpx 28rpx 0;
+    padding: 46rpx 0 0;
     .list-title {
       height: 32rpx;
       line-height: 32rpx;
@@ -308,103 +355,108 @@ export default {
       }
     }
     .list-main {
-      height: calc(~"100% - 374rpx");
-      .sign-in-list {
-        height: 100%;
-        ul {
-          li {
-            margin: 0 24rpx;
-            border-bottom: 1px solid #e5e5e5;
-            padding: 30rpx 0;
+      min-height: calc(~"100% - 374rpx");
+      ul {
+        li {
+          margin: 0 24rpx;
+          border-bottom: 1px solid #e5e5e5;
+          padding: 30rpx 0;
+          overflow: hidden;
+          .top {
+            width: 80rpx;
+            height: 80rpx;
+            float: left;
+            border-radius: 50%;
+            line-height: 80rpx;
+            text-align: center;
+            font-size: 26rpx;
+            color: white;
+            background-color: #eee;
             overflow: hidden;
-            .top {
-              width: 80rpx;
-              height: 80rpx;
-              float: left;
-              border-radius: 50%;
+            img {
+              width: 100%;
+            }
+          }
+          .center {
+            float: left;
+            margin-left: 24rpx;
+            width: calc(~"100% - 264rpx");
+            .center-title {
+              font-size: 36rpx;
+            }
+            .center-sign {
+              margin-top: 23rpx;
               overflow: hidden;
-              img {
-                width: 100%;
-              }
-            }
-            .center {
-              float: left;
-              margin-left: 24rpx;
-              width: calc(~"100% - 264rpx");
-              .center-title {
-                font-size: 36rpx;
-              }
-              .center-sign {
-                margin-top: 23rpx;
-                overflow: hidden;
-                & > div {
-                  width: 110rpx;
-                  float: left;
-                  margin-right: 40rpx;
-                  &:last-child {
-                    margin-right: 0;
-                  }
-                  h2 {
-                    font-size: 26rpx;
-                    color: #666;
-                  }
-                  p {
-                    width: 98rpx;
-                    height: 36rpx;
-                    background: #ff8915;
-                    border-radius: 18rpx;
-                    color: white;
-                    font-size: 22rpx;
-                    line-height: 36rpx;
-                    margin-top: 8rpx;
-                    text-align: center;
-                    &.on {
-                      background: rgba(81, 197, 18, 1);
-                    }
+              & > div {
+                width: 110rpx;
+                float: left;
+                margin-right: 40rpx;
+                &:last-child {
+                  margin-right: 0;
+                }
+                h2 {
+                  font-size: 26rpx;
+                  color: #666;
+                }
+                p {
+                  width: 98rpx;
+                  height: 36rpx;
+                  background: #ff8915;
+                  border-radius: 18rpx;
+                  color: white;
+                  font-size: 22rpx;
+                  line-height: 36rpx;
+                  margin-top: 8rpx;
+                  text-align: center;
+                  &.on {
+                    background: rgba(81, 197, 18, 1);
                   }
                 }
               }
             }
-            .btn {
-              float: right;
-              p {
-                text-align: center;
-                &.readonly {
-                  width: 144rpx;
-                  height: 60rpx;
-                  background: rgba(255, 255, 255, 1);
-                  border-radius: 8rpx;
-                  border: 2rpx solid rgba(229, 51, 48, 1);
-                  font-size: 28rpx;
-                  color: rgba(229, 51, 48, 1);
-                  line-height: 60rpx;
-                  opacity: 0.5;
-                }
-                &.on {
-                  width: 144rpx;
-                  height: 60rpx;
-                  background: rgba(255, 255, 255, 1);
-                  border-radius: 8rpx;
-                  border: 2rpx solid rgba(229, 51, 48, 1);
-                  font-size: 28rpx;
-                  color: rgba(229, 51, 48, 1);
-                  line-height: 60rpx;
-                }
-                &.off {
-                  width: 144rpx;
-                  height: 60rpx;
-                  background: rgba(229, 51, 48, 0.4);
-                  border-radius: 8rpx;
-                  font-size: 28rpx;
-                  color: rgba(255, 255, 255, 1);
-                  line-height: 60rpx;
-                }
+          }
+          .btn {
+            float: right;
+            p {
+              text-align: center;
+              &.readonly {
+                width: 144rpx;
+                height: 60rpx;
+                background: rgba(255, 255, 255, 1);
+                border-radius: 8rpx;
+                border: 2rpx solid rgba(229, 51, 48, 1);
+                font-size: 28rpx;
+                color: rgba(229, 51, 48, 1);
+                line-height: 60rpx;
+                opacity: 0.5;
+              }
+              &.on {
+                width: 144rpx;
+                height: 60rpx;
+                background: rgba(255, 255, 255, 1);
+                border-radius: 8rpx;
+                border: 2rpx solid rgba(229, 51, 48, 1);
+                font-size: 28rpx;
+                color: rgba(229, 51, 48, 1);
+                line-height: 60rpx;
+              }
+              &.off {
+                width: 144rpx;
+                height: 60rpx;
+                background: rgba(229, 51, 48, 0.4);
+                border-radius: 8rpx;
+                font-size: 28rpx;
+                color: rgba(255, 255, 255, 1);
+                line-height: 60rpx;
               }
             }
           }
         }
       }
     }
+  }
+  .sign-btn-h {
+    height: 100rpx;
   }
   .sign-in-btn {
     position: fixed;

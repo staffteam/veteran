@@ -36,9 +36,9 @@
         <ul>
           <li
             v-for="item in detail.SignInList"
-            :key="item.StudentId"
-            :class="item.StudentId == userInfo.userid?'on':''"
-          >{{item.Name}}</li>
+            :key="item"
+            :class="item == userInfo.Name?'on':''"
+          >{{item}}</li>
         </ul>
       </scroll-view>
     </div>
@@ -58,7 +58,8 @@ export default {
       isAllowSign: false,
       isSign: false,
       userInfo: {},
-      pid: ""
+      pid: "",
+      timeObj: {}
     };
   },
   methods: {
@@ -76,17 +77,15 @@ export default {
               icon: "success"
             });
             vm.IsSignIn = true;
-            vm.detail.SignInList.push({
-              Name: vm.userInfo.Name,
-              StudentId: vm.userInfo.userid
-            });
+            vm.detail.SignInList.push(vm.userInfo.Name);
             vm.detail.SignInTotal = vm.detail.SignInList.length;
           });
       }
     },
     startCountDown() {
       let vm = this;
-      let timeObj = setInterval(_ => {
+      clearInterval(vm.timeObj);
+      vm.timeObj = setInterval(_ => {
         let { h, m, s } = vm.countDown;
         if (s == 0) {
           //减少一分钟
@@ -105,7 +104,7 @@ export default {
             //小于一小时 倒计时结束
             vm.countDown.s == 0;
             vm.isAllowSign = true;
-            clearInterval(timeObj);
+            clearInterval(vm.timeObj);
           }
           vm.countDown.s = +s - 1 > 9 ? +s - 1 : "0" + (+s - 1);
         }
@@ -125,6 +124,14 @@ export default {
   onLoad(o) {
     let vm = this;
     vm.pid = o.id;
+    vm.countDown = {
+      h: "00",
+      m: "00",
+      s: "00"
+    };
+    vm.detail = {};
+    vm.isAllowSign = false;
+    vm.isSign = false;
     vm.userInfo = mpvue.getStorageSync("userInfo");
     vm.$api
       .$signGet("视频课程详情", {

@@ -1,7 +1,7 @@
 <template>
   <div class="exam-go">
     <div class="exam-go-top">
-      <h2>{{exam.testContent}}</h2>
+      <h2>{{exam.Content}}</h2>
       <div>
         <p :class="warn?'on':''" v-if="!isAnalysis">
           <i class="iconfont icon-jiancepingtaizhuijia_shijian"></i>
@@ -9,27 +9,27 @@
         </p>
         <p>
           <i class="iconfont icon-timu"></i>
-          {{examinationNum}}/{{exam.totalTitle}}
+          {{examinationNum}}/{{exam.TopicCount}}
         </p>
       </div>
     </div>
     <div class="exam-go-top-h"></div>
-    <template v-for="(item,index) in examListData">
-      <div class="exam-go-main" :key="item.id" v-if="(index+1) == examinationNum">
+    <template v-for="(item,index) in exam.TopicList">
+      <div class="exam-go-main" :key="item.Id" v-if="(index+1) == examinationNum">
         <div class="title">
-          <span>{{item.radio?'(单选题)':'(多选题)'}}</span>
-          {{item.title}}
+          <span>{{!item.IsMultiple?'(单选题)':'(多选题)'}}</span>
+          {{item.Title}}
         </div>
         <div class="check-list">
           <ul>
             <li
-              v-for="(items,i) in item.options"
+              v-for="(items,i) in item.OptionList"
               :class="items.check?'on':''"
-              :key="items.id"
-              @click="goCheck(item,items.id)"
+              :key="items.Id"
+              @click="goCheck(item,items)"
             >
-              <p>{{optionsArr[i]}}</p>
-              <h2>{{items.title}}</h2>
+              <p>{{items.optionIndex}}</p>
+              <h2>{{items.optionText}}</h2>
             </li>
           </ul>
         </div>
@@ -53,11 +53,7 @@ export default {
       isFinish: false,
       optionsArr: ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K"],
       commonMsg: false,
-      exam: {
-        testContent: "政治常识科目",
-        totalTitle: "2",
-        testTime: "30"
-      },
+      exam: {},
       countDown: {
         h: "00",
         m: "00",
@@ -66,58 +62,8 @@ export default {
       examinationNum: 1,
       overtime: false,
       warn: false,
-      examListData: [
-        {
-          id: "1",
-          radio: true,
-          title:
-            "金秋时节农民采摘柿子时，最后总要在树上留一些熟透的柿子。果农说，这是留给喜鹊的食物。每到冬天，喜鹊都在果树上筑过冬，到春天也不飞走，整天忙着捕捉果树上的虫子，从而保证了来年柿子的丰收。关于这一事例留给我们的启示，错误的表述是( )",
-          options: [
-            {
-              id: "1_1",
-              title: "事物之间有其固有的联系 "
-            },
-            {
-              id: "1_2",
-              title: "人与自然的关系是相互利用的关系 "
-            },
-            {
-              id: "1_3",
-              title: "人们可以发现并利用规律来实现自己的目的 "
-            },
-            {
-              id: "1_4",
-              title: "保持生态系统的平衡是人类生存发展的必要条件发展的必要条件 "
-            }
-          ]
-        },
-        {
-          id: "2",
-          radio: false,
-          title:
-            "2金秋时节农民采摘柿子时，最后总要在树上留一些熟透的柿子。果农说，这是留给喜鹊的食物。每到冬天，喜鹊都在果树上筑过冬，到春天也不飞走，整天忙着捕捉果树上的虫子，从而保证了来年柿子的丰收。关于这一事例留给我们的启示，错误的表述是( )",
-          options: [
-            {
-              id: "2_1",
-              title: "事物之间有其固有的联系 "
-            },
-            {
-              id: "2_2",
-              title: "人与自然的关系是相互利用的关系 "
-            },
-            {
-              id: "2_3",
-              title: "人们可以发现并利用规律来实现自己的目的 "
-            },
-            {
-              id: "2_4",
-              title: "保持生态系统的平衡是人类生存发展的必要条件 "
-            }
-          ]
-        }
-      ],
       checks: {},
-      isAnalysis:false
+      isAnalysis: false
     };
   },
   methods: {
@@ -130,41 +76,59 @@ export default {
       }
     },
     nextGo() {
-      if (+this.exam.totalTitle > this.examinationNum) {
-        if (+this.exam.totalTitle - 1 == this.examinationNum) {
-          this.isFinish = true;
+      let vm = this;
+      if (+vm.exam.TopicCount > vm.examinationNum) {
+        let is = false;
+        vm.exam.TopicList.forEach((value, index) => {
+          if (index + 1 == vm.examinationNum) {
+            value.OptionList.forEach(value2 => {
+              if (value2.check) {
+                is = true;
+              }
+            });
+          }
+        });
+        if (is) {
+          if (+vm.exam.TopicCount - 1 == vm.examinationNum) {
+            vm.isFinish = true;
+          }
+          vm.examinationNum++;
+        } else {
+          mpvue.showToast({
+            title: "请选择选项",
+            icon: "none"
+          });
         }
-        this.examinationNum++;
       }
     },
-    goCheck(item, _id) {
+    goCheck(item, items) {
       let vm = this;
-      vm.examListData = vm.examListData.map(value => {
-        if (value.id == item.id) {
-          value.options = value.options.map(value2 => {
+      vm.exam.TopicList = vm.exam.TopicList.map(value => {
+        if (value.Id == item.Id) {
+          value.OptionList = value.OptionList.map(value2 => {
             //判断是否单选
-            if (item.radio) {
-              if (value2.id == _id) {
+            if (!item.IsMultiple) {
+              if (value2.Id == items.Id) {
                 value2.check = true;
-                vm.checks[value.id] = [value2];
+                vm.checks[value.Id] = [value2];
               } else {
                 value2.check = false;
               }
             } else {
-              if (value2.id == _id) {
+              if (value2.Id == items.Id) {
                 value2.check = !value2.check;
                 //选中后，存储信息
                 if (value2.check) {
                   //如果没有储存过，创建容器
-                  if (!vm.checks[value.id]) {
-                    vm.checks[value.id] = [value2];
+                  if (!vm.checks[value.Id]) {
+                    vm.checks[value.Id] = [value2];
                   } else {
-                    vm.checks[value.id].push(value2);
+                    vm.checks[value.Id].push(value2);
                   }
                 } else {
                   //取消选中
-                  vm.checks[value.id] = vm.checks[value.id].filter(value3 => {
-                    return value2.id != value3.id;
+                  vm.checks[value.Id] = vm.checks[value.Id].filter(value3 => {
+                    return value2.Id != value3.Id;
                   });
                 }
               }
@@ -176,10 +140,118 @@ export default {
       });
       console.log(JSON.stringify(vm.checks));
     },
-    goFinish() {
-      mpvue.setStorageSync("examChecks",this.checks);
-      mpvue.redirectTo({
-        url: "../../my/examResult/main"
+    goFinish(obj) {
+      if (!obj) {
+        let is = false;
+        vm.exam.TopicList.forEach((value, index) => {
+          if (index + 1 == vm.examinationNum) {
+            value.OptionList.forEach(value2 => {
+              if (value2.check) {
+                is = true;
+              }
+            });
+          }
+        });
+        if (!is) {
+          mpvue.showToast({
+            title: "请选择选项",
+            icon: "none"
+          });
+        }
+      }
+      let vm = this,
+        score = 0,
+        isPass = false,
+        time = 0,
+        examArr = [],
+        examJson={};
+      Object.keys(vm.checks).forEach(item => {
+        let ids = [];
+        vm.checks[item].forEach(value => {
+          ids.push(value.Id);
+        });
+        //判断是否选中
+        if (vm.checks[item].length > 0) {
+          //判断是否为多选题
+          if (vm.checks[item][0].IsMultiple) {
+            //如果是多选题，则判断选项中是否有错误的选项
+            let _is = true; //默认题目选择正确，得分
+            vm.checks[item].forEach(value => {
+              if (!value.IsRight) {
+                //这是一道错误题，记零分
+                _is = false;
+              }
+            });
+            //如果在上面进行验证时，验证通过，没有选择错误题，则进行下面的验证
+            if (_is) {
+              //判断是否漏选了正确的题目
+              vm.exam.TopicList.forEach(value => {
+                //在列表中找到对应的题目
+                if (item == value.Id) {
+                  //遍历题目中的选项
+                  value.OptionList.forEach(value2 => {
+                    //满足条件：该题是正确的，且没有选中，则该题为零分
+                    if (!value2.check && value2.IsRight) {
+                      _is = false;
+                    }
+                  });
+                }
+              });
+            }
+            //如果上面的两个验证都通过，则该题正确，反之亦然
+            if (_is) {
+              score = score + vm.checks[item][0].Score;
+            }
+            examJson[item] = _is;
+          } else {
+            //如果这是一道单选题，则判断是否选中正确项
+            if (vm.checks[item][0].IsRight) {
+              //选中正确，记分
+              score = score + vm.checks[item][0].Score;
+              examJson[item] = true;
+            }else{
+              examJson[item] = false;
+            }
+          }
+        }
+        examArr.push({
+          SubjectTopicId: item,
+          SubjectOptionId: ids.join(",")
+        });
+      });
+      let examResultList=[];
+      vm.exam.TopicList.forEach(value => {
+        if(examJson[value.Id]){
+          examResultList.push({Id:value.Id,IsRight:true});
+        }else{
+          examResultList.push({Id:value.Id,IsRight:false});
+        }
+      });
+      //判断得分是否大于等于及格分数
+      isPass = score > vm.exam.PassScore;
+      //计算剩余时间分钟数，秒钟忽略
+      let _outTime = +vm.countDown.h * 60 + vm.countDown.m;
+      //考试时间减去剩余时间，得出实际考试时间
+      time = +vm.exam.ExamTime - _outTime;
+      let prams = {
+        SubjectId: vm.exam.Id,
+        StudentId: mpvue.getStorageSync("userid"),
+        Score: score,
+        IsPass: isPass,
+        ExamTime: time,
+        ExamDetails: examArr
+      };
+      vm.$api.$signPost("交卷", prams).then(res => {
+        mpvue.showToast({
+          title: "提交成功",
+          icon: "success"
+        });
+        setTimeout(_ => {
+          mpvue.setStorageSync("examPrams", {...prams,Name:vm.exam.Name,PassScore:vm.exam.PassScore,examResultList:examResultList,MaxScore:vm.exam.Score});
+          mpvue.redirectTo({
+            url: "../../my/examResult/main"
+          });
+        }, 1500);
       });
     }
   },
@@ -194,51 +266,67 @@ export default {
     });
   },
   onLoad(o) {
-    let _time = +this.exam.testTime;
-      if (_time > 60) {
-        let _h = (_time - _time % 60) / 60;
-        let _m = _time % 60;
-        this.countDown.h = +_h > 9 ? _h : "0" + _h;
-        this.countDown.m = +_m > 9 ? _m : "0" + _m;
-        this.countDown.s = "00";
-      } else {
-        this.countDown.h = "00";
-        this.countDown.m = +_time > 9 ? _time : "0" + _time;
-        this.countDown.s = "00";
-      }
-      let vm = this;
-      let timeObj = setInterval(_ => {
-        let { h, m, s } = vm.countDown;
-        if (s == 0) {
-          if (h == 0 && m == 1) {
-            //小于一分钟，警告
-            vm.warn = true;
-          }
-          //减少一分钟
-          if (m == 0 && h != 0) {
-            //大于等于一小时 减少一小时
-            vm.countDown.h = +h - 1 > 9 ? +h - 1 : "0" + (+h - 1);
-            vm.countDown.m = "59";
-            vm.countDown.s = "59";
-          } else if (m != 0) {
-            //大于等于一分钟 减少一分钟
-            vm.countDown.m = +m - 1 > 9 ? +m - 1 : "0" + (+m - 1);
-            vm.countDown.s = "59";
-          }
+    let vm = this;
+    this.$api
+      .$signGet("科目详情", {
+        id: o.id,
+        userid: mpvue.getStorageSync("userid")
+      })
+      .then(res => {
+        vm.exam = res.Data;
+        vm.exam.TopicList=vm.exam.TopicList.map(value => {
+          value.OptionList=value.OptionList.map(value2 => {
+            value2.IsMultiple = value.IsMultiple;
+            value2.Score = value.Score;
+            value2.optionIndex = value2.Content.split("：")[0];
+            value2.optionText = value2.Content.split("：")[1];
+            return value2;
+          });
+          return value;
+        });
+        let _time = +vm.exam.ExamTime;
+        if (_time > 60) {
+          let _h = (_time - _time % 60) / 60;
+          let _m = _time % 60;
+          vm.countDown.h = +_h > 9 ? _h : "0" + _h;
+          vm.countDown.m = +_m > 9 ? _m : "0" + _m;
+          vm.countDown.s = "00";
         } else {
-          if (h == 0 && m == 0 && s == 1) {
-            //小于一小时 倒计时结束
-            vm.commonMsg = true;
-            clearInterval(timeObj);
-            setTimeout(_ => {
-              mpvue.redirectTo({
-                url: "../../my/examResult/main"
-              });
-            }, 2000);
-          }
-          vm.countDown.s = +s - 1 > 9 ? +s - 1 : "0" + (+s - 1);
+          vm.countDown.h = "00";
+          vm.countDown.m = +_time > 9 ? _time : "0" + _time;
+          vm.countDown.s = "00";
         }
-      }, 1000);
+        let timeObj = setInterval(_ => {
+          let { h, m, s } = vm.countDown;
+          if (s == 0) {
+            if (h == 0 && m == 1) {
+              //小于一分钟，警告
+              vm.warn = true;
+            }
+            //减少一分钟
+            if (m == 0 && h != 0) {
+              //大于等于一小时 减少一小时
+              vm.countDown.h = +h - 1 > 9 ? +h - 1 : "0" + (+h - 1);
+              vm.countDown.m = "59";
+              vm.countDown.s = "59";
+            } else if (m != 0) {
+              //大于等于一分钟 减少一分钟
+              vm.countDown.m = +m - 1 > 9 ? +m - 1 : "0" + (+m - 1);
+              vm.countDown.s = "59";
+            }
+          } else {
+            if (h == 0 && m == 0 && s == 1) {
+              //小于一小时 倒计时结束
+              vm.commonMsg = true;
+              clearInterval(timeObj);
+              setTimeout(_ => {
+                vm.goFinish(true);
+              }, 2000);
+            }
+            vm.countDown.s = +s - 1 > 9 ? +s - 1 : "0" + (+s - 1);
+          }
+        }, 1000);
+      });
   }
 };
 </script>
@@ -344,7 +432,7 @@ export default {
     left: 0;
     width: 100%;
   }
-  .exam-go-bottom-h{
+  .exam-go-bottom-h {
     height: 118rpx;
   }
   .exam-go-bottom {
