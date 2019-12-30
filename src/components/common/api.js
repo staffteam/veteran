@@ -228,16 +228,19 @@ const $keyPost = (name, data, header) => {
     mpvue.request(obj);
   })
 }
-const $signPost = (name, data, header) => {
+const $signPost = (name, data, header,isArgs) => {
   load.show();
   return new Promise((resolve, reject) => {
+    if(!isArgs){
+      data={
+        args:JSON.stringify(data)
+      }
+    }
     let obj = {
       url: path[name],
       method: 'POST',
       dataType: 'json',
-      data: {
-        args:JSON.stringify(data)
-      },
+      data: data,
       success(res) {
         load.hide();
         if (res.statusCode == '200') {

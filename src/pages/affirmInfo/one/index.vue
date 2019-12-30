@@ -146,12 +146,10 @@ export default {
       } else {
         if (!this.isReadonly) {
           vm.$api
-            .$signGet("纠错", {
-              args: {
-                Areas: vm.userInfo.Areas,
-                SchoolId: vm.userInfo.SchoolId,
-                StudentId: vm.userInfo.userid
-              }
+            .$signPost("纠错", {
+              Areas: vm.userInfo.Areas,
+              SchoolId: vm.userInfo.SchoolId,
+              StudentId: vm.userInfo.userid
             })
             .then(res => {
               vm.errorCorrection = true;

@@ -177,7 +177,7 @@ export default {
         vm.$api
           .$signPost("学员确认信息", {
             userid: vm.userInfo.userid
-          })
+          },false,true)
           .then(res => {
             mpvue.showToast({
               title: "信息确认成功",
