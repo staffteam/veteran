@@ -1,8 +1,11 @@
 <template>
   <div>
-    <div class="home" >
+    <div class="talent-space">
       <p>
         <img src="/static/images/home-back.jpg" mode="widthFix" />
+      </p>
+      <p>
+        <img src="/static/images/member-top-back.jpg" mode="widthFix" />
       </p>
       <ul>
         <li v-for="(item,index) in homeNavData" :key="index">
@@ -11,6 +14,7 @@
               <img :src="item.icon" mode="widthFix" />
             </p>
             <h2>{{item.title}}</h2>
+            <i class="iconfont icon-right"></i>
           </a>
         </li>
       </ul>
@@ -26,25 +30,23 @@ export default {
         {
           title: "人才交流",
           url: "../../recruitment/list/main",
-          icon: "/static/images/home-list1.png"
+          icon: "/static/images/talentSpace1.png"
         },
         {
           title: "孵化项目",
           url: "../../talentSpace/detail/main",
-          icon: "/static/images/home-list2.png"
+          icon: "/static/images/talentSpace2.png"
         },
         {
           title: "金融项目",
           url: "../../talentSpace/detail/main",
-          icon: "/static/images/home-list3.png"
+          icon: "/static/images/talentSpace3.png"
         }
-      ],
+      ]
     };
   },
-  methods: {
-  },
-  created() {
-  },
+  methods: {},
+  created() {},
   onShow() {
     mpvue.setNavigationBarColor({
       frontColor: "#ffffff",
@@ -62,7 +64,7 @@ export default {
 </script>
 
 <style lang="less" scoped>
-.home {
+.talent-space {
   position: relative;
   top: 0;
   left: 0;
@@ -82,35 +84,46 @@ export default {
   ul {
     position: relative;
     z-index: 9;
-    width: calc(~"100% - 80rpx");
-    margin: 40rpx auto;
+    width: calc(~"100% - 110rpx");
+    margin: 0 auto;
+    padding: 54rpx 0;
     li {
-      text-align: center;
-      width: calc(~"82% / 3");
-      margin: 30rpx 3%;
+      width: 100%;
+      margin: 40rpx 0;
+      padding: 38rpx 45rpx;
       position: relative;
       overflow: hidden;
-      border-radius: 24rpx;
-      float: left;
+      border-radius: 10rpx;
+      height: 200rpx;
+      background-color: white;
+      box-shadow: 0px 0px 40rpx 0px rgba(0, 0, 0, 0.2);
+      &:last-child{
+        p{
+          width: 25%;
+        }
+      }
       p {
-        width: 150rpx;
-        height: 150rpx;
-        margin: 0 auto;
-        border-radius: 20rpx;
-        overflow: hidden;
-        img {
-          width: 100%;
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        width: 30%;
+        height: 80%;
+        img{
+          height: 100%;
+          max-width: 100%;
+          max-height: 100%;
         }
       }
       h2 {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        text-align: center;
+        font-size: 36rpx;
+        font-weight: bold;
+        color: rgba(242, 71, 36, 1);
+        line-height: 54rpx;
+      }
+      i{
         font-size: 32rpx;
-        color: white;
-        line-height: 60rpx;
+        color: #F24724;
+        margin-top: 40rpx;
       }
     }
   }

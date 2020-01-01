@@ -328,7 +328,7 @@ export default {
       border-radius: 4rpx;
       border: 2rpx solid #e53330;
       text-align: center;
-      line-height: 80rpx;
+      line-height: 76rpx;
       font-size: 36rpx;
       display: inline-block;
       color: #e53330;

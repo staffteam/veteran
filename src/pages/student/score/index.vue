@@ -1,12 +1,12 @@
 <template>
   <div class="score-list">
     <ul>
-      <li v-for="item in scoreListData" :key="item.id" :class="item.qualified?'on':''">
-        <h2 class="line">{{item.title}}</h2>
-        <p>{{item.score}}</p>
+      <li v-for="item in scoreListData" :key="item.id" :class="item.IsPass?'on':''">
+        <h2 class="line">{{item.SubjectName}}</h2>
+        <p>{{item.Score}}</p>
       </li>
     </ul>
-    <load-data :isLoading="isLoading" :isNotData="isNotData" />
+    <!-- <load-data :isLoading="isLoading" :isNotData="isNotData" /> -->
   </div>
 </template>
 
@@ -19,20 +19,7 @@ export default {
       isGet: true,
       pageNum: 1,
       pageSize: 10,
-      scoreListData: [
-        {
-          title: "资料分析",
-          score: "59",
-          qualified: false,
-          id: 0
-        },
-        {
-          title: "马克思理论",
-          score: "90",
-          qualified: true,
-          id: 1
-        }
-      ]
+      scoreListData: [ ]
     };
   },
   /**
@@ -67,8 +54,13 @@ export default {
       }
     });
   },
-  onLoad() {
+  onLoad(o) {
     let vm = this;
+    this.$api.$signGet('考试成绩',{
+      userid:o.id
+    }).then(res=>{
+      vm.scoreListData = res.Data;
+    })
   }
 };
 </script>

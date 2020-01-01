@@ -29,7 +29,7 @@
       <div class="sign">
         <div class="sign-btn">
           <!-- 未到上课签到时间 -->
-          <div v-if="!allowStartSign" class="off">
+          <div v-if="!SignInStatus && !allowStartSign" class="off">
             <p>
               <span>距下次签到</span>
               <span>{{startCountDown}}</span>
@@ -177,7 +177,7 @@ export default {
     getSignInfo(data) {
       let vm = this;
       this.SignInStatus = data.SignInStatus;
-      this.SignOutStatus = data.SignOutStatus;
+      this.SignOutStatus = data.SignOutStatus == null?false:data.SignOutStatus;
       this.info = {
         title: data.Title,
         teacher: data.TeacherName,

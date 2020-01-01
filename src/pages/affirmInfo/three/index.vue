@@ -1,7 +1,8 @@
 <template>
   <div class="affirm-info">
     <p>
-      <img src="/static/images/login-back.jpg" mode="widthFix" />
+      <img src="/static/images/login-back_01.jpg" mode="widthFix" />
+      <img src="/static/images/login-back_03.jpg" mode="widthFix" />
     </p>
     <div class="login" v-if="!errorCorrection">
       <div class="login-main">
@@ -175,9 +176,14 @@ export default {
         });
       } else {
         vm.$api
-          .$signPost("学员确认信息", {
-            userid: vm.userInfo.userid
-          },false,true)
+          .$signPost(
+            "学员确认信息",
+            {
+              userid: vm.userInfo.userid
+            },
+            false,
+            true
+          )
           .then(res => {
             mpvue.showToast({
               title: "信息确认成功",
@@ -220,6 +226,7 @@ export default {
 
 <style lang="less" scoped>
 .affirm-info {
+  background-color: #fefaf9;
   & > p {
     position: fixed;
     top: 0;
@@ -228,6 +235,12 @@ export default {
     height: 100vh;
     img {
       width: 100%;
+      &:last-child{
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+      }
     }
   }
   .login {

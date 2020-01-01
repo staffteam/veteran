@@ -19,7 +19,8 @@
     </div>
     <div class="login" v-if="isLogin=='1'">
       <p>
-        <img src="/static/images/login-back.jpg" mode="widthFix" />
+        <img src="/static/images/login-back_01.jpg" mode="widthFix" />
+        <img src="/static/images/login-back_03.jpg" mode="widthFix" />
       </p>
       <div class="login-main">
         <div class="title">
@@ -373,7 +374,8 @@ export default {
     position: relative;
     z-index: 9;
     width: calc(~"100% - 80rpx");
-    margin: 40rpx auto;
+    margin: 0 auto;
+    padding: 40rpx 0;
     li {
       text-align: center;
       width: calc(~"82% / 3");
@@ -419,13 +421,19 @@ export default {
     height: 100vh;
     img {
       width: 100%;
+      &:last-child{
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+      }
     }
   }
   .login-main {
     position: relative;
     z-index: 9;
     .title {
-      padding-top: 100rpx;
+      padding-top: 20%;
       padding-left: 95rpx;
       font-size: 44rpx;
       color: rgba(229, 51, 48, 1);

@@ -8,13 +8,14 @@
 
     <div class="feedback">
       <div class="title">常见问题</div>
-      <div class="li" @click="recommendClick(item.id)" v-for="item in recommendData" :key="item.id">
-        <div class="t">{{item.title}}</div>
+      <div class="li" @click="recommendClick(item.Id)" v-for="item in recommendData" :key="item.Id">
+        <div class="t">{{item.Title}}</div>
         <i :class="'iconfont icon-you1 ' + (item.on?'on':'')"></i>
         <div :class="'desc wxparse-mains '+ (item.on?'on':'')">
-          <wxParse :content="item.content" />
+          <wxParse :content="item.Content" />
         </div>
       </div>
+      <load-data :isLoading="isLoading" :isNotData="isNotData" />
     </div>
   </div>
 </template>
@@ -27,16 +28,24 @@ export default {
   },
   data() {
     return {
-      serviceTel: "123 3132 1233",
-      recommendData: [
-        {
-          id: 2,
-          title: "怎么进行团队报名？",
-          content:
-            "<p>点击添加参赛人，新增参赛人填写参赛人的基础信息，勾选多个参赛人点击确定进行团队报名。</p>"
-        }
-      ]
+      isLoading: false,
+      isNotData: false,
+      isGet: true,
+      pageNum: 1,
+      pageSize: 10,
+      serviceTel: "",
+      recommendData: []
     };
+  },
+  /**
+   * 页面上拉触底事件的处理函数
+   */
+  onReachBottom: function() {
+    let vm = this;
+    if (vm.isGet) {
+      vm.pageNum++;
+      vm.getData();
+    }
   },
   methods: {
     makePhone() {
@@ -46,13 +55,35 @@ export default {
     },
     recommendClick(id) {
       this.recommendData = this.recommendData.map(value => {
-        if (value.id == id) {
+        if (value.Id == id) {
           value.on = !value.on;
         } else {
           value.on = false;
         }
         return value;
       });
+    },
+    getData() {
+      let vm = this;
+      vm.isGet = false;
+      vm.isLoading = true;
+      vm.$api
+        .$signGet("文章列表", {
+          enCode: 'cjwt',
+          page: vm.pageNum
+        })
+        .then(res => {
+          if (res.Data.list.length > 0) {
+            vm.isGet = true;
+            vm.isLoading = false;
+            vm.recommendData = [...res.Data.list,...vm.recommendData];
+          } else {
+            vm.isGet = false;
+            vm.isLoading = false;
+            vm.isNotData = true;
+          }
+          vm.serviceTel = res.Data.tel;
+        });
     }
   },
   onShow() {
@@ -67,6 +98,9 @@ export default {
   },
   onLoad() {
     let vm = this;
+    vm.pageNum = 1;
+    vm.recommendData = [];
+    this.getData();
   }
 };
 </script>

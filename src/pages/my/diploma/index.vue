@@ -20,7 +20,11 @@ export default {
     return {
       canvasW: "",
       canvasH: "",
-      tempFilePath: ""
+      tempFilePath: "",
+      info: {
+        Name: "",
+        Image: "/static/images/certificate.jpg"
+      }
     };
   },
   methods: {
@@ -40,21 +44,45 @@ export default {
         }
       });
     },
+    getData(url) {
+      var vm = this;
+      let query = mpvue.createSelectorQuery();
+      query
+        .select(".diploma-canvas")
+        .boundingClientRect(function(rect) {
+          let _w = rect.width;
+          let _h = rect.height;
+          vm.canvasW = _w;
+          vm.canvasH = _h;
+          const ctx = mpvue.createCanvasContext("qrCanvas");
+          ctx.drawImage(url, 0, 0, _w, _h);
+          ctx.save();
+          ctx.translate(_w * 0.6, _w * 0.23); //设置画布上的(0,0)位置，也就是旋转的中心点
+          ctx.rotate(90 * Math.PI / 180);
+          ctx.setFillStyle("#000");
+          ctx.setFontSize(_w * 0.03);
+          ctx.fillText(vm.info.Name, 0, 0);
+          ctx.restore();
+          ctx.stroke(); //stroke() 方法会实际地绘制出通过 moveTo() 和 lineTo() 方法定义的路径。默认颜色是黑色
+          ctx.draw(false, vm.drawPicture()); //draw()的回调函数
+        })
+        .exec();
+    },
     drawPicture: function() {
       //生成图片
-      var that = this;
+      var vm = this;
       setTimeout(function() {
-        wx.canvasToTempFilePath({
+        mpvue.canvasToTempFilePath({
           //把当前画布指定区域的内容导出生成指定大小的图片，并返回文件路径
           x: 0,
           y: 0,
-          width: that.canvasW,
-          height: that.canvasH,
-          destWidth: that.canvasW * 2, //输出的图片的宽度（写成width的两倍，生成的图片则更清晰）
-          destHeight: that.canvasH * 2,
+          width: vm.canvasW,
+          height: vm.canvasH,
+          destWidth: vm.canvasW * 2, //输出的图片的宽度（写成width的两倍，生成的图片则更清晰）
+          destHeight: vm.canvasH * 2,
           canvasId: "qrCanvas",
           success: function(res) {
-            that.tempFilePath = res.tempFilePath;
+            vm.tempFilePath = res.tempFilePath;
             console.log("++++++++++++++", res);
           }
         });
@@ -70,31 +98,26 @@ export default {
         timingFunc: "easeIn"
       }
     });
-    var that = this;
-    let query = mpvue.createSelectorQuery();
-    query
-      .select(".diploma-canvas")
-      .boundingClientRect(function(rect) {
-        let _w = rect.width;
-        let _h = rect.height;
-        that.canvasW = _w;
-        that.canvasH = _h;
-        const ctx = mpvue.createCanvasContext("qrCanvas");
-        ctx.drawImage("/static/images/certificate.jpg", 0, 0, _w, _h);
-        ctx.save();
-        ctx.translate(_w * 0.6, _w * 0.23); //设置画布上的(0,0)位置，也就是旋转的中心点
-        ctx.rotate(90 * Math.PI / 180);
-        ctx.setFillStyle("#000");
-        ctx.setFontSize(_w * 0.03);
-        ctx.fillText("马化腾", 0, 0);
-        ctx.restore();
-        ctx.stroke(); //stroke() 方法会实际地绘制出通过 moveTo() 和 lineTo() 方法定义的路径。默认颜色是黑色
-        ctx.draw(false, that.drawPicture()); //draw()的回调函数
-      })
-      .exec();
   },
   onLoad() {
     let vm = this;
+    vm.$api
+      .$signGet("我的证书", {
+        userid: mpvue.getStorageSync("userid")
+      })
+      .then(res => {
+        res.Data.Image = res.Data.Image || "/static/images/certificate.jpg";
+        vm.info = res.Data;
+        mpvue.getImageInfo({
+          src: res.Data.Image,
+          success(res) {
+            if(res.path == 'static/images/certificate.jpg'){
+              res.path = "/"+res.path;
+            }
+            vm.getData(res.path);
+          }
+        });
+      });
   }
 };
 </script>
@@ -133,7 +156,7 @@ export default {
       line-height: 88rpx;
       margin: 0 auto;
       color: white;
-      i{
+      i {
         color: white;
         display: inline-block;
         margin-right: 10rpx;

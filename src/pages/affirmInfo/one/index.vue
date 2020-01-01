@@ -1,7 +1,8 @@
 <template>
   <div class="affirm-info">
     <p>
-      <img src="/static/images/login-back.jpg" mode="widthFix" />
+      <img src="/static/images/login-back_01.jpg" mode="widthFix" />
+      <img src="/static/images/login-back_03.jpg" mode="widthFix" />
     </p>
     <div class="login" v-if="!errorCorrection">
       <div class="login-main">
@@ -202,7 +203,7 @@ export default {
       this.schoolJson = _arr2;
     });
   },
-  onUnload(){
+  onUnload() {
     mpvue.setStorageSync("oneLogin", "1");
   },
   onLoad() {
@@ -213,6 +214,7 @@ export default {
 
 <style lang="less" scoped>
 .affirm-info {
+  background-color: #fefaf9;
   & > p {
     position: fixed;
     top: 0;
@@ -221,6 +223,12 @@ export default {
     height: 100vh;
     img {
       width: 100%;
+      &:last-child{
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+      }
     }
   }
   .login {

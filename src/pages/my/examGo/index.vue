@@ -36,11 +36,12 @@
       </div>
     </template>
     <div class="exam-go-bottom-h"></div>
-    <div class="exam-go-bottom" v-if="!isFinish">
+    <div class="exam-go-bottom">
       <p :class="isFirst?'off':''" @click="prevGo()">上一题</p>
-      <p @click="nextGo()">下一题</p>
+      <p v-if="!isFinish" @click="nextGo()">下一题</p>
+      <p v-if="isFinish" class="finish" @click="goFinish">提交</p>
     </div>
-    <div class="finish" v-if="isFinish && !isAnalysis" @click="goFinish">交卷并查看结果</div>
+    <!-- <div class="finish" v-if="isFinish && !isAnalysis" @click="goFinish">交卷并查看结果</div> -->
     <hint :commonMsg="commonMsg" title="考试时间到" viceTitle="将自动交卷" />
   </div>
 </template>
@@ -73,6 +74,7 @@ export default {
           this.isFirst = true;
         }
         this.examinationNum--;
+        this.isFinish = false;
       }
     },
     nextGo() {
@@ -93,6 +95,7 @@ export default {
             vm.isFinish = true;
           }
           vm.examinationNum++;
+          vm.isFirst = false;
         } else {
           mpvue.showToast({
             title: "请选择选项",
@@ -452,7 +455,7 @@ export default {
       border-radius: 4rpx;
       border: 2rpx solid #e53330;
       text-align: center;
-      line-height: 80rpx;
+      line-height: 76rpx;
       font-size: 36rpx;
       display: inline-block;
       color: #e53330;
@@ -460,6 +463,10 @@ export default {
       &.off {
         border: 2rpx solid #e5e5e5;
         color: #999;
+      }
+      &.finish{
+        background-color: #e53330;
+        color: white;
       }
     }
   }

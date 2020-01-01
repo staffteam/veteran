@@ -1,17 +1,15 @@
 <template>
-  <div class="not">
-    正在建设中...
+  <div class="not-exam" >
+    <img src="/static/images/not-exploit.jpg" mode="widthFix" />
   </div>
 </template>
 
 <script>
 export default {
   data() {
-    return {
-    };
+    return {};
   },
-  methods: {
-  },
+  methods: {},
   onShow() {
     mpvue.setNavigationBarColor({
       frontColor: "#ffffff",
@@ -29,10 +27,16 @@ export default {
 </script>
 
 <style lang="less" scoped>
-.not{
-  padding: 200rpx 0;
-  text-align: center;
-  font-size:35rpx;
-  color:#999;
-}
+.not-exam{
+    width: 100%;
+    height: 100vh;
+    img{
+      max-width:40%;
+      position: relative;
+      display: block;
+      margin: 0 auto;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+  }
 </style>

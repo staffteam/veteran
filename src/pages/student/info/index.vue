@@ -2,32 +2,32 @@
   <div class="info">
     <div class="top">
       <p>
-        <img :src="info.top_url" alt />
+        <img :src="info.Image" mode="aspectFill" />
       </p>
-      <h2>{{info.name}}</h2>
+      <h2>{{info.Name}}</h2>
     </div>
     <div class="form-line"></div>
     <div class="form-item">
       <span>性别</span>
-      <div>{{info.sex}}</div>
+      <div>{{info.Sex?'男':'女'}}</div>
     </div>
     <div class="form-item">
       <span>年龄</span>
-      <div>{{info.age}}</div>
+      <div>{{info.Age || '未公开'}}</div>
     </div>
     <div class="form-line"></div>
     <div class="form-item">
       <span>中队编号</span>
-      <div>{{info.staffelNum }}</div>
+      <div>{{info.SquadronNo }}</div>
     </div>
     <div class="form-item">
       <span>分队编号</span>
-      <div>{{info.squadNum}}</div>
+      <div>{{info.SquadNo}}</div>
     </div>
     <div class="form-item">
       <span>上课签到</span>
       <div>
-        <a :href="'../../student/sign/main?id='+identity">
+        <a :href="'../../student/sign/main?id='+info.Id">
           查看详情
           <i class="iconfont icon-you1"></i>
         </a>
@@ -36,7 +36,7 @@
     <div class="form-item">
       <span>考试成绩</span>
       <div>
-        <a :href="'../../student/score/main?id='+identity">
+        <a :href="'../../student/score/main?id='+info.Id">
           查看详情
           <i class="iconfont icon-you1"></i>
         </a>
@@ -45,15 +45,15 @@
     <div class="form-line"></div>
     <div class="form-item">
       <span>职务</span>
-      <div>{{info.duty }}</div>
+      <div>{{info.Title }}</div>
     </div>
     <div class="form-item">
       <span>手机</span>
-      <div>{{info.phone}}</div>
+      <div>{{info.Phone}}</div>
     </div>
     <div class="form-item">
       <span>联系地址</span>
-      <div>{{info.contactAddress}}</div>
+      <div>{{info.Areas}}</div>
     </div>
   </div>
 </template>
@@ -62,17 +62,8 @@
 export default {
   data() {
     return {
-      identity: "",
+      pid: "",
       info: {
-        top_url: "/static/images/top.png",
-        name: "王旭东",
-        sex: "男",
-        age: "32",
-        staffelNum: "088",
-        squadNum: "288",
-        duty: "干部",
-        phone: "15073231614",
-        contactAddress: "深圳市龙岗区"
       }
     };
   },
@@ -87,8 +78,15 @@ export default {
       }
     });
   },
-  onLoad() {
+  onLoad(o) {
     let vm = this;
+    vm.pid = o.id;
+    this.$api.$signGet('根据手机号获取学员信息',{
+      phone:o.id,
+      userid:mpvue.getStorageSync('userid')
+    }).then(res=>{
+      vm.info = res.Data;
+    })
   }
 };
 </script>

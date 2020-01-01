@@ -363,10 +363,11 @@ export default {
         margin: 12rpx 0;
         height: 56rpx;
         line-height: 56rpx;
+        border: 1rpx solid white;
         position: relative;
         &.on {
           p {
-            border: 1px solid #e53330 !important;
+            border: 1rpx solid #e53330 !important;
             background-color: #e53330;
             color: white !important;
           }
@@ -376,19 +377,22 @@ export default {
         }
         &.the {
           p {
-            border: 1px solid #e53330;
+            border: 1rpx solid #e53330;
             color: #e53330;
+          }
+          &:before {
+            display: none !important;
           }
         }
         &.out-time {
           p {
-            border: 1px solid #999;
+            border: 1rpx solid #999;
             color: #999;
           }
         }
         &.the-time {
           p {
-            border: 1px solid #51c512;
+            border: 1rpx solid #51c512;
             color: #51c512;
           }
         }

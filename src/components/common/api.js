@@ -29,7 +29,13 @@ const path = {
   '公司列表': `${api}/Company/GetCompanyList`,
   '职位列表': `${api}/Company/GetRecruitList`,
   '老师根据日期获取签到状态': `${api}/Course/GetDateListByTeacher`,
-  '老师根据日期获取课程': `${api}/Course/GetCourseListByTeacher`
+  '老师根据日期获取课程': `${api}/Course/GetCourseListByTeacher`,
+  '文章列表': `${api}/Article/GetArticleList`,
+  '文章详情': `${api}/Article/GetArticleDetail`,
+  '关于我们': `${api}/Article/GetArticleDetailByEnCode`,
+  '考试成绩':`${api}/Member/GetMyScorelist`,
+  '学员签到列表':`${api}/Member/GetMySignInlist`,
+  '我的证书':`${api}/Member/GetMyDiploma`
 };
 const load = {
   show() {

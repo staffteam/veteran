@@ -4,7 +4,7 @@
       <li v-for="item in recruitmentListData" :key="item.Id">
         <a :href="'../../recruitment/detail/main?id='+item.Id">
           <p>
-            <img :src="item.Logo || '/static/images/recruitment-default.jpg'" mode="aspectFill" />
+            <img :src="item.Logo || '/static/images/recruitment-default.jpg'" @error="errImage(item.Id)" mode="aspectFill" />
           </p>
           <div>
             <h2 class="line">{{item.Name}}</h2>
@@ -46,6 +46,14 @@ export default {
     }
   },
   methods: {
+    errImage(id){
+      this.recruitmentListData = this.recruitmentListData.map(value=>{
+        if(id == value.Id){
+          value.Logo = '/static/images/recruitment-default.jpg';
+        }
+        return value;
+      })
+    },
     getData() {
       let vm = this;
       vm.isGet = false;

@@ -1,32 +1,18 @@
 <template>
   <div class="workProgram">
-    <div class="top">
-      <scroll-view :scroll-x="true">
-        <ul :style="maxw!=0?'width:'+maxw+'px;':''">
-          <li
-            class="tag-li"
-            v-for="item in tagData"
-            :key="item.id"
-            :class="item.id == tagCheck?'on':''"
-            @click="tagClick(item)"
-          >{{item.title}}</li>
-        </ul>
-      </scroll-view>
-    </div>
-    <div class="top-h"></div>
     <div class="workProgram-main">
       <ul>
-        <li v-for="item in workProgramData" :key="item.id">
-          <a :href="'../../workProgram/detail/main?id='">
+        <li v-for="item in workProgramData" :key="item.Id">
+          <a :href="'../../workProgram/detail/main?id='+item.Id">
             <div>
-              <h2 class="lines">{{item.title}}</h2>
+              <h2 class="lines">{{item.Title}}</h2>
               <p>
-                <span>{{item.time}}</span>
-                <span>{{item.flow}} 阅读</span>
+                <span>{{item.UpdateTime || '刚刚'}}</span>
+                <span>{{item.Stat}} 阅读</span>
               </p>
             </div>
             <p>
-              <img :src="item.img_url" mode="aspectFill" />
+              <img :src="item.Image" @error="errImage(item.Id)" mode="aspectFill" />
             </p>
           </a>
         </li>
@@ -46,38 +32,8 @@ export default {
       pageNum: 1,
       pageSize: 10,
       maxw: 0,
-      tagCheck: "1",
-      tagData: [
-        { id: "1", title: "通知文件" },
-        { id: "2", title: "作息时间入口" },
-        { id: "3", title: "人员规划" }
-      ],
-      workProgramData: [
-        {
-          title: "这是一个文章标题这是一个文章标题",
-          time: "2019-10-19",
-          flow: "13344",
-          img_url: "/static/images/course.jpg"
-        },
-        {
-          title: "这是一个文章标题这是一个文章标题",
-          time: "2019-10-19",
-          flow: "13344",
-          img_url: "/static/images/course.jpg"
-        },
-        {
-          title: "这是一个文章标题这是一个文章标题",
-          time: "2019-10-19",
-          flow: "13344",
-          img_url: "/static/images/course.jpg"
-        },
-        {
-          title: "这是一个文章标题这是一个文章标题",
-          time: "2019-10-19",
-          flow: "13344",
-          img_url: "/static/images/course.jpg"
-        }
-      ]
+      tagCheck: "ylmk",
+      workProgramData: []
     };
   },
   /**
@@ -91,18 +47,41 @@ export default {
     }
   },
   methods: {
+    errImage(id){
+      this.workProgramData = this.workProgramData.map(value=>{
+        if(id == value.Id){
+          value.Image = '/static/images/course.jpg';
+        }
+        return value;
+      })
+    },
     getData() {
       let vm = this;
       vm.isGet = false;
       vm.isLoading = true;
-      setTimeout(_ => {
-        vm.isGet = false;
-        vm.isLoading = false;
-        vm.isNotData = true;
-      }, 1000);
+      vm.$api
+        .$signGet("文章列表", {
+          enCode: vm.tagCheck,
+          page: vm.pageNum
+        })
+        .then(res => {
+          if (res.Data.length > 0) {
+            vm.isGet = true;
+            vm.isLoading = false;
+            vm.workProgramData = [...vm.workProgramData,...res.Data];
+          } else {
+            vm.isGet = false;
+            vm.isLoading = false;
+            vm.isNotData = true;
+          }
+        });
     },
     tagClick(item) {
       this.tagCheck = item.id;
+      this.workProgramData = [];
+      this.pageNum = 1;
+      this.isNotData = false;
+      this.getData();
     }
   },
   onShow() {
@@ -117,6 +96,8 @@ export default {
   },
   onLoad() {
     let vm = this;
+    this.workProgramData = [];
+    this.pageNum = 1;
     this.getData();
     let _query = wx.createSelectorQuery();
     setTimeout(_ => {
@@ -173,42 +154,42 @@ export default {
   .top-h {
     height: 96rpx;
   }
-  .workProgram-main{
-    min-height: calc(~"100vh - 96rpx");
-    ul{
-      li{
+  .workProgram-main {
+    min-height: 96rpx;
+    ul {
+      li {
         padding: 35rpx 0;
         margin: 0 32rpx;
-        border-bottom: 1rpx solid #EEEEEE;
-        a{
+        border-bottom: 1rpx solid #eeeeee;
+        a {
           display: block;
           overflow: hidden;
-          &>p{
+          & > p {
             width: 218rpx;
             height: 156rpx;
             float: right;
-            img{
-              width:100%;
+            img {
+              width: 100%;
               height: 100%;
             }
           }
-          &>div{
-            float:left;
+          & > div {
+            float: left;
             width: calc(~"100% - 258rpx");
-            h2{
+            h2 {
               font-size: 30rpx;
               font-weight: 600;
               line-height: 42rpx;
               height: 84rpx;
             }
-            p{
+            p {
               margin-top: 30rpx;
-              span{
+              span {
                 color: #999;
                 display: block;
-                float:left;
+                float: left;
                 font-size: 24rpx;
-                &:last-child{
+                &:last-child {
                   float: right;
                 }
               }

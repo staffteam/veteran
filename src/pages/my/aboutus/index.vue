@@ -1,7 +1,7 @@
 <template>
   <div class="my-exam">
     <div class="top"><img src="/static/images/about-top.jpg" mode="widthFix"></div>
-    <div class="detail-content wxparse-mains">
+    <div class="detail-content wxparse-mains" v-if="aboutusContent!=''">
       <wxParse :content="aboutusContent" />
     </div>
   </div>
@@ -15,7 +15,7 @@ export default {
   },
   data() {
     return {
-        aboutusContent:"<p style='font-size:16px;'>     这是一段公司简介这是一段公司简介这是一段公司简介这是一段公司简介这是一段公司简介这是一段公司简介这是一段公司简介这是一段公司简介这是一段公司简介这是一段公司简介这是一段公司简介这是一段公司简介这是一段公司简介这是一段公司简介</p>"
+        aboutusContent:""
     };
   },
   methods: {
@@ -33,6 +33,11 @@ export default {
   },
   onLoad() {
     let vm = this;
+    this.$api.$signGet('关于我们',{
+      enCode:"gywm"
+    }).then(res=>{
+      vm.aboutusContent = res.Data.Content;
+    })
   }
 };
 </script>

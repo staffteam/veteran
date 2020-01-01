@@ -33,14 +33,14 @@
       <scroll-view scroll-y="false" class="main-list">
         <ul>
           <li v-for="item in memberListData" :key="item.id">
-            <a :href="item.url" v-if="item.icon != 'icon-fenxiang'">
+            <a :href="item.url" v-if="item.icon != 'icon-send'">
               <h2>
                 <i :class="'iconfont '+item.icon"></i>
                 {{item.title}}
               </h2>
               <i class="iconfont icon-you1"></i>
             </a>
-            <div v-if="item.icon == 'icon-fenxiang'">
+            <div v-if="item.icon == 'icon-send'">
               <button open-type="share" class="btn-share"></button>
               <h2>
                 <i :class="'iconfont '+item.icon"></i>
@@ -51,7 +51,7 @@
           </li>
           <li @click="outLogin()">
             <h2>
-              <i class="iconfont icon-tuichu"></i> 退出登录
+              <i class="iconfont icon-changyongtubiao-xianxingdaochu-zhuanqu-"></i> 退出登录
             </h2>
             <i class="iconfont icon-you1"></i>
           </li>
@@ -134,31 +134,31 @@ export default {
       vm.memberListData = [
         {
           url: "../my/diploma/main",
-          icon: "icon-jieyezhengshu",
+          icon: "icon-jieyezhengshu1",
           title: "结业证书",
           id: "0"
         },
         {
           url: "../my/aboutus/main",
-          icon: "icon-guanyu",
+          icon: "icon-prompt",
           title: "关于我们",
           id: "1"
         },
         {
           url: "",
-          icon: "icon-fenxiang",
+          icon: "icon-send",
           title: "分享好友",
           id: "2"
         },
         {
           url: "../my/feedback/main",
-          icon: "icon-fankui",
+          icon: "icon-editor",
           title: "意见反馈",
           id: "3"
         },
         {
           url: "../my/help/main",
-          icon: "icon-bangzhuzhongxin",
+          icon: "icon-message",
           title: "帮助中心",
           id: "4"
         }
@@ -279,7 +279,7 @@ export default {
             line-height: 103rpx;
             i {
               color: #e53330;
-              font-size: 35rpx;
+              font-size: 40rpx;
               float: left;
               display: block;
               margin-right: 20rpx;
