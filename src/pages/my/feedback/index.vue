@@ -52,16 +52,24 @@ export default {
       } else if (!/^1[3456789]\d{9}$/.test(this.phoneVal)) {
         vm.showHint("手机号格式错误");
       } else {
-        mpvue.showLoading({
-          title: "请稍后"
-        });
-        mpvue.hideLoading();
-        mpvue.showToast({
-          title: "提交成功！",
-          mask: true,
-          icon: "success",
-          duration: 2000
-        });
+        vm.$api
+          .$signPost("用户反馈", {
+            StudentId: mpvue.getStorageSync("userid"),
+            Content: vm.feedbackVal,
+            Phone: vm.phoneVal
+          })
+          .then(res => {
+            mpvue.showToast({
+              title: "提交成功！",
+              mask: true,
+              icon: "success"
+            });
+            setTimeout(_ => {
+              mpvue.navigateBack({
+                delta: 1
+              });
+            }, 1500);
+          });
       }
     }
   },
@@ -77,6 +85,10 @@ export default {
   },
   onLoad() {
     let vm = this;
+    let userInfo = mpvue.getStorageSync("userInfo");
+    if (userInfo.Phone) {
+      vm.phoneVal = userInfo.Phone;
+    }
   }
 };
 </script>
