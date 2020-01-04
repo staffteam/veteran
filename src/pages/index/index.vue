@@ -4,10 +4,14 @@
       <p>
         <img src="/static/images/home-back.jpg" mode="widthFix" />
       </p>
+      <div class="title">欢迎来到「{{userInfo.SchoolName}}」</div>
       <ul>
-        <template  v-for="(item,index) in homeNavData" >
-          <li :key="index" v-if="((item.isTeacher && isAdmin) || !item.isTeacher) && ((item.isUser && !isAdmin) || !item.isUser)">
-            <a :href="item.url" >
+        <template v-for="(item,index) in homeNavData">
+          <li
+            :key="index"
+            v-if="((item.isTeacher && isAdmin) || !item.isTeacher) && ((item.isUser && !isAdmin) || !item.isUser)"
+          >
+            <a :href="item.url">
               <p>
                 <img :src="item.icon" mode="widthFix" />
               </p>
@@ -74,7 +78,45 @@ export default {
         code: ""
       },
       codeText: "获取验证码",
-      homeNavData: [
+      homeNavData: [],
+      isAdmin: false,
+      hasUserInfo: false,
+      canIUse: wx.canIUse("button.open-type.getUserInfo"),
+      isLogin: "-1",
+      isGetCode: false,
+      isCode: "",
+      timeObj: {},
+      userInfo: {}
+    };
+  },
+  methods: {
+    getUserInfo: function(e) {
+      if (!e.mp.detail || !e.mp.detail.userInfo) return;
+      var vm = this;
+      var userInfo_ = e.mp.detail.userInfo;
+      vm.hasUserInfo = true;
+      vm.getInfo(
+        {
+          detail: {
+            userInfo: userInfo_
+          }
+        },
+        _ => {
+          vm.goLogin();
+        }
+      );
+    },
+    showHint(text, time = 1000) {
+      let vm = this;
+      vm.commonMsg = true;
+      vm.commonTitle = text;
+      setTimeout(_ => {
+        vm.commonMsg = false;
+        vm.commonTitle = "";
+      }, time);
+    },
+    getNavData() {
+      this.homeNavData = [
         {
           title: "工作方案",
           url: "../workProgram/list/main",
@@ -94,7 +136,7 @@ export default {
           title: "在线试题",
           url: "../my/exam/main",
           icon: "/static/images/home-list4.png",
-          isUser:true
+          isUser: true
         },
         {
           title: "上课签到",
@@ -110,7 +152,7 @@ export default {
           title: "学员查询",
           url: "../student/query/main",
           icon: "/static/images/home-list15.png",
-          isTeacher:true
+          isTeacher: true
         },
         {
           title: "结业典礼",
@@ -152,41 +194,7 @@ export default {
           url: "",
           icon: "/static/images/home-list14.png"
         }
-      ],
-      isAdmin:false,
-      hasUserInfo: false,
-      canIUse: wx.canIUse("button.open-type.getUserInfo"),
-      isLogin: "-1",
-      isGetCode: false,
-      isCode: "",
-      timeObj:{}
-    };
-  },
-  methods: {
-    getUserInfo: function(e) {
-      if (!e.mp.detail || !e.mp.detail.userInfo) return;
-      var vm = this;
-      var userInfo_ = e.mp.detail.userInfo;
-      vm.hasUserInfo = true;
-      vm.getInfo(
-        {
-          detail: {
-            userInfo: userInfo_
-          }
-        },
-        _ => {
-          vm.goLogin();
-        }
-      );
-    },
-    showHint(text, time = 1000) {
-      let vm = this;
-      vm.commonMsg = true;
-      vm.commonTitle = text;
-      setTimeout(_ => {
-        vm.commonMsg = false;
-        vm.commonTitle = "";
-      }, time);
+      ];
     },
     getInfos(obj) {
       let vm = this;
@@ -195,6 +203,7 @@ export default {
           userid: obj.Id
         })
         .then(res => {
+          vm.getNavData();
           if (obj.Status == 0) {
             let userInfo = mpvue.getStorageSync("userInfo");
             mpvue.setStorageSync("userInfo", {
@@ -241,6 +250,38 @@ export default {
             vm.isLogin = "0";
             mpvue.showTabBar();
             mpvue.setStorageSync("oneLogin", "1");
+          } else if (obj.Status == 2) {
+            //毕业生
+            vm.homeNavData = vm.homeNavData.map(value => {
+              if (value.title != "人才空间") {
+                value.url = "../graduation/main";
+              }
+              return value;
+            });
+            mpvue.showToast({
+              title: "登陆成功",
+              icon: "success"
+            });
+            let userInfo = mpvue.getStorageSync("userInfo");
+            mpvue.setStorageSync("userInfo", {
+              ...userInfo,
+              ...res.Data,
+              userid: obj.Id,
+              user_status: obj.Status,
+              wx_avatarUrl: userInfo.avatarUrl,
+              wx_city: userInfo.city
+            });
+            mpvue.setStorageSync("userid", obj.Id);
+            vm.form.phone = "";
+            vm.form.code = "";
+            vm.hasUserInfo = false;
+            vm.codeText = "获取验证码";
+            vm.isCode = "";
+            clearInterval(vm.timeObj);
+            vm.isGetCode = false;
+            vm.isLogin = "0";
+            mpvue.showTabBar();
+            mpvue.setStorageSync("oneLogin", "1");
           } else {
             mpvue.showToast({
               title: "您的信息正在审核中\r\n请耐心等待",
@@ -258,10 +299,10 @@ export default {
         vm.showHint("手机号格式有误");
       } else if (vm.form.code == "") {
         vm.showHint("请输入验证码");
-      } 
+      }
       // else if (vm.form.code != vm.isCode) {
       //   vm.showHint("验证码有误");
-      // } 
+      // }
       else {
         this.$api
           .$signGet("登陆", {
@@ -326,8 +367,10 @@ export default {
         timingFunc: "easeIn"
       }
     });
+    vm.getNavData();
     let oneLogin = mpvue.getStorageSync("oneLogin");
     let userInfo = mpvue.getStorageSync("userInfo");
+    vm.userInfo = userInfo;
     let userid = mpvue.getStorageSync("userid");
     this.isAdmin = userInfo.IsTeacher;
     //没有认证但登录了，跳转至认证模块
@@ -340,6 +383,23 @@ export default {
       if (userInfo.userid && userid) {
         this.isLogin = "0";
         mpvue.showTabBar();
+        this.$api
+          .$signGet("登陆", {
+            value: userInfo.Phone
+          })
+          .then(res => {
+            if (res.Data.Status == 2) {
+              //毕业生
+              vm.homeNavData = vm.homeNavData.map(value => {
+                if (value.title != "人才空间") {
+                  value.url = "../graduation/main";
+                }
+                return value;
+              });
+            } else {
+              vm.getNavData();
+            }
+          });
       }
       if (!userInfo.userid) {
         this.isLogin = "1";
@@ -370,12 +430,22 @@ export default {
       width: 100%;
     }
   }
+  div.title {
+    position: relative;
+    z-index: 9;
+    text-align: center;
+    font-size:45rpx;
+    font-style:italic;
+    font-weight: 600;
+    color: #e53330;
+    padding: 40rpx 0 30rpx;
+  }
   ul {
     position: relative;
     z-index: 9;
     width: calc(~"100% - 80rpx");
     margin: 0 auto;
-    padding: 40rpx 0;
+    padding: 0 0 40rpx;
     li {
       text-align: center;
       width: calc(~"82% / 3");
@@ -413,6 +483,7 @@ export default {
   left: 0;
   width: 100%;
   height: 100vh;
+  background-color: #fefaf9;
   & > p {
     position: fixed;
     top: 0;
@@ -421,7 +492,7 @@ export default {
     height: 100vh;
     img {
       width: 100%;
-      &:last-child{
+      &:last-child {
         position: absolute;
         bottom: 0;
         left: 0;

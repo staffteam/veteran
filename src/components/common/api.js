@@ -35,7 +35,9 @@ const path = {
   '关于我们': `${api}/Article/GetArticleDetailByEnCode`,
   '考试成绩':`${api}/Member/GetMyScorelist`,
   '学员签到列表':`${api}/Member/GetMySignInlist`,
-  '我的证书':`${api}/Member/GetMyDiploma`
+  '我的证书':`${api}/Member/GetMyDiploma`,
+  '人才交流':`${api}/Company/GetRcjlCompanyList`,
+  '人才交流详情':`${api}/Company/GetRcjlRecruitList`
 };
 const load = {
   show() {

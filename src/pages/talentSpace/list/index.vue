@@ -29,7 +29,7 @@ export default {
       homeNavData: [
         {
           title: "人才交流",
-          url: "../../recruitment/list/main",
+          url: "../../talentSpace/exchangeList/main",
           icon: "/static/images/talentSpace1.png"
         },
         {

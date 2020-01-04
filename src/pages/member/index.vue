@@ -16,13 +16,23 @@
     </div>
     <div class="member-top-list" v-if="!userInfo.IsTeacher">
       <ul>
-        <li>
+        <li v-if="userStatus==1">
           <a href="../my/exam/main">
             <img src="/static/images/member-top-list1.jpg" />
           </a>
         </li>
-        <li>
+        <li v-if="userStatus==2">
+          <a :href="'../student/score/main?id='+userInfo.Id">
+            <img src="/static/images/member-top-list1.jpg" />
+          </a>
+        </li>
+        <li v-if="userStatus==1">
           <a href="../sign/in/main">
+            <img src="/static/images/member-top-list2.jpg" />
+          </a>
+        </li>
+        <li v-if="userStatus==2">
+          <a href="../graduation/main">
             <img src="/static/images/member-top-list2.jpg" />
           </a>
         </li>
@@ -66,7 +76,8 @@ export default {
   data() {
     return {
       userInfo: {},
-      memberListData: []
+      memberListData: [],
+      userStatus: 1
     };
   },
   methods: {
@@ -90,6 +101,18 @@ export default {
         timingFunc: "easeIn"
       }
     });
+    let vm = this;
+    let userInfo = mpvue.getStorageSync("userInfo");
+    this.$api
+      .$signGet("登陆", {
+        value: userInfo.Phone
+      })
+      .then(res => {
+        if (res.Data.Status == 2) {
+          //毕业生
+          vm.userStatus = 2;
+        }
+      });
   },
   onShareAppMessage: function() {
     return {
@@ -240,7 +263,7 @@ export default {
   }
   .member-main-list {
     border-top: 20rpx solid #f7f7f7;
-    &.teacher{
+    &.teacher {
       border-top: 0;
     }
     & > h2 {

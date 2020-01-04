@@ -36,6 +36,8 @@
     "pages/structure/detail/main",
     "pages/talentSpace/list/main",
     "pages/talentSpace/detail/main",
+    "pages/talentSpace/exchangeList/main",
+    "pages/talentSpace/exchangeDetail/main",
     "pages/testQuestions/main",
     "pages/workProgram/list/main",
     "pages/workProgram/detail/main",
@@ -46,7 +48,8 @@
     "pages/student/info/main",
     "pages/student/query/main",
     "pages/student/score/main",
-    "pages/student/sign/main"
+    "pages/student/sign/main",
+    "pages/graduation/main"
   ],
   "window": {
     "backgroundTextStyle": "light",
