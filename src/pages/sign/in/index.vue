@@ -289,6 +289,7 @@ export default {
     });
     let userInfo = mpvue.getStorageSync("userInfo");
     this.isAdmin = userInfo.IsTeacher;
+    this.signInListData = [];
     this.getDates();
   },
   onLoad() {

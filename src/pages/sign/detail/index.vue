@@ -307,7 +307,8 @@ export default {
             },
             success: function(data) {
               mpvue.hideLoading();
-              vm.locateContent = data.result.address;
+              console.log(data.result);
+              vm.locateContent = data.result.formatted_addresses.recommend;
               vm.signScope = vm.info.locate == vm.locateContent;
             }
           });

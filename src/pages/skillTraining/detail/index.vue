@@ -52,6 +52,7 @@ export default {
 <style lang="less" scoped>
 @import url("~mpvue-wxparse/src/wxParse.css");
 .workProgram-detail {
+  background-color: #f9f6f3;
   .top {
     position: fixed;
     top: 0;

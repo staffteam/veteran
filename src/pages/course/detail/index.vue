@@ -1,6 +1,7 @@
 <template>
   <div class="course-detail">
-    <txv-video :vid="detail.Content" playerid="txv1" width="100%" height="420rpx"></txv-video>
+    <txv-video v-if="detail.Content" :vid="detail.Content" :playerid="detail.Content" :autoplay="true" width="100%" height="420rpx"></txv-video>
+    <div class="video-back" v-if="!detail.Content"></div>
     <div class="course-sign">
       <h2>离签到还需要观看</h2>
       <p>
@@ -155,6 +156,11 @@ export default {
 </script>
 
 <style lang="less" scoped>
+.video-back{
+  width:100%;
+  height: 420rpx;
+  background-color: black;
+}
 .course-sign {
   height: 88rpx;
   line-height: 88rpx;
