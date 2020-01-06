@@ -98,6 +98,7 @@
           </div>
           <p class="locate-content">{{locateContent}}</p>
         </div>
+        <!-- <div>{{signData}}</div> -->
       </div>
     </div>
     <hint :commonMsg="commonMsg" title="未在考勤区内" viceTitle="请重新定位" />
@@ -113,7 +114,7 @@ export default {
         title: "",
         teacher: "",
         locate: "",
-        id:""
+        id: ""
       },
       allowStartSign: false,
       startCountDown: "加载中···",
@@ -129,7 +130,8 @@ export default {
       qqmapsdk: "",
       signScope: false,
       commonMsg: false,
-      isEndLeaveOut:false
+      isEndLeaveOut: false,
+      signData: ""
     };
   },
   methods: {
@@ -137,16 +139,18 @@ export default {
     startSign() {
       let vm = this;
       if (vm.signScope) {
-        vm.$api.$signPost('学生签到',{
-          id:vm.info.id,
-          userid:mpvue.getStorageSync("userid")
-        }).then(res=>{
-          mpvue.showToast({
-            title: "签到成功！",
-            icon: "success"
+        vm.$api
+          .$signPost("学生签到", {
+            id: vm.info.id,
+            userid: mpvue.getStorageSync("userid")
+          })
+          .then(res => {
+            mpvue.showToast({
+              title: "签到成功！",
+              icon: "success"
+            });
+            vm.SignInStatus = true;
           });
-          vm.SignInStatus = true;
-        })
       } else {
         vm.commonMsg = true;
         setTimeout(_ => {
@@ -157,16 +161,18 @@ export default {
     // 下课签到
     endSign() {
       if (this.signScope) {
-        vm.$api.$signPost('学生签到',{
-          id:vm.info.id,
-          userid:mpvue.getStorageSync("userid")
-        }).then(res=>{
-          mpvue.showToast({
-            title: "签到成功！",
-            icon: "success"
+        vm.$api
+          .$signPost("学生签到", {
+            id: vm.info.id,
+            userid: mpvue.getStorageSync("userid")
+          })
+          .then(res => {
+            mpvue.showToast({
+              title: "签到成功！",
+              icon: "success"
+            });
+            vm.SignOutStatus = true;
           });
-          vm.SignOutStatus = true;
-        })
       } else {
         this.commonMsg = true;
         setTimeout(_ => {
@@ -176,13 +182,14 @@ export default {
     },
     getSignInfo(data) {
       let vm = this;
-      this.SignInStatus = data.SignInStatus;
-      this.SignOutStatus = data.SignOutStatus == null?false:data.SignOutStatus;
+      this.SignInStatus = data.SignInStatus == null ? false : true;
+      this.SignOutStatus =
+        data.SignOutStatus == null ? false : data.SignOutStatus;
       this.info = {
         title: data.Title,
         teacher: data.TeacherName,
         locate: data.Address,
-        id:data.Id
+        id: data.Id
       };
       let start_h = "";
       let end_h = "";
@@ -204,14 +211,14 @@ export default {
           this.endSignTime = `上午${end_h}:${end_m}`;
         }
         let date = new Date();
-        let signTime = new Date(data.StartTime);
+        let signTime = new Date(data.StartTime.replace(/\-/g,"\/"));
         let SignInTime = new Date(
           `${signTime.getFullYear()}/${signTime.getMonth() +
-            1}/${signTime.getDate()} ${data.SignInTime}:00`
+            1}/${signTime.getDate()} ${data.SignInTime}`
         );
         let SignOutTime = new Date(
           `${signTime.getFullYear()}/${signTime.getMonth() +
-            1}/${signTime.getDate()} ${data.SignOutTime}:00`
+            1}/${signTime.getDate()} ${data.SignOutTime}`
         );
         let _outTime = data.ReservedTime * 60 * 1000;
         //判断是否已到上课签到时间 条件：当前时间小于等于上课时间，且时间间隔不大于一小时
@@ -241,15 +248,24 @@ export default {
       let diff = SignInTime.getTime() - date.getTime();
       if (diff > _outTime) {
         //当前时间小于上课时间，且没有到可以上课打卡的时间范围
-        diff = diff-_outTime;
-        let hours = Math.floor(diff / (3600 * 1000)); //计算出小时数
-        let leave2 = hours % (3600 * 1000); //计算小时数后剩余的毫秒数
-        let minutes = Math.floor(leave2 / (60 * 1000)); //计算相差分钟数
-        let leave3 = leave2 % (60 * 1000); //计算分钟数后剩余的毫秒数
-        let seconds = Math.round(leave3 / 1000); //计算相差秒钟
-        this.startCountDown = `${hours < 10 ? "0" + hours : hours}:${
-          minutes < 10 ? "0" + minutes : minutes
-        }:${seconds < 10 ? "0" + seconds : seconds}`;
+        let _d = this.$common.getTimeDiff({
+          start_time: date,
+          end_time: SignInTime,
+          units: "天"
+        });
+        if (_d == 0) {
+          this.startCountDown = this.$common.getTimeDiff({
+            start_time: date,
+            end_time: SignInTime,
+            format: "hh:mm:ss"
+          });
+        } else {
+          this.startCountDown = this.$common.getTimeDiff({
+            start_time: date,
+            end_time: SignInTime,
+            format: "DD天hh时"
+          });
+        }
       } else {
         if (diff <= _outTime && diff >= 0) {
           //当前时间小于等于上课时间，但已经在能打卡范围
@@ -267,16 +283,26 @@ export default {
       let date = new Date();
       let diff = SignOutTime.getTime() - date.getTime();
       if (diff > _outTime) {
-        diff = diff-_outTime;
+        diff = diff - _outTime;
         //当前时间小于下课时间，且没有在下课可打卡的时间范围
-        let hours = Math.floor(diff / (3600 * 1000)); //计算出小时数
-        let leave2 = diff % (3600 * 1000); //计算小时数后剩余的毫秒数
-        let minutes = Math.floor(leave2 / (60 * 1000)); //计算相差分钟数
-        let leave3 = leave2 % (60 * 1000); //计算分钟数后剩余的毫秒数
-        let seconds = Math.round(leave3 / 1000); //计算相差秒钟
-        this.endCountDown = `${hours < 10 ? "0" + hours : hours}:${
-          minutes < 10 ? "0" + minutes : minutes
-        }:${seconds < 10 ? "0" + seconds : seconds}`;
+        let _d = this.$common.getTimeDiff({
+          start_time: date,
+          end_time: SignOutTime,
+          units: "天"
+        });
+        if (_d == 0) {
+          this.endCountDown = this.$common.getTimeDiff({
+            start_time: date,
+            end_time: SignOutTime,
+            format: "hh:mm:ss"
+          });
+        } else {
+          this.endCountDown = this.$common.getTimeDiff({
+            start_time: date,
+            end_time: SignOutTime,
+            format: "DD天hh时"
+          });
+        }
       } else {
         if (diff <= _outTime && diff >= 0) {
           //当前时间小于下课时间，且已经可以下课打卡
@@ -296,7 +322,9 @@ export default {
         title: "定位中"
       });
       mpvue.getLocation({
-        type: "wgs84",
+        type: "gcj02",
+        // isHighAccuracy:true,
+        // highAccuracyExpireTime:4000,
         success: function(res) {
           console.log(res);
           //2、根据坐标获取当前位置名称，显示在顶部:腾讯地图逆地址解析
@@ -326,7 +354,7 @@ export default {
       }
     });
     this.qqmapsdk = new QQMapWX({
-      key: "KSVBZ-FXYEO-YPOWF-SS2GK-UBMQ7-G5BXE"
+      key: "B3SBZ-6KH6R-RBKWH-WQ6VY-YZ4WO-RSFHV"
     });
   },
   onLoad(o) {

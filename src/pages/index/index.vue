@@ -4,7 +4,7 @@
       <p>
         <img src="/static/images/home-back.jpg" mode="widthFix" />
       </p>
-      <div class="title">欢迎来到「{{userInfo.SchoolName}}」</div>
+      <div class="title" v-if="userInfo.SchoolName" >欢迎来到「{{userInfo.SchoolName}}」</div>
       <ul>
         <template v-for="(item,index) in homeNavData">
           <li
@@ -86,7 +86,9 @@ export default {
       isGetCode: false,
       isCode: "",
       timeObj: {},
-      userInfo: {}
+      userInfo: {
+        SchoolName:""
+      }
     };
   },
   methods: {
@@ -239,6 +241,8 @@ export default {
               wx_avatarUrl: userInfo.avatarUrl,
               wx_city: userInfo.city
             });
+            userInfo = mpvue.getStorageSync("userInfo");
+            vm.userInfo = userInfo;
             mpvue.setStorageSync("userid", obj.Id);
             vm.form.phone = "";
             vm.form.code = "";
@@ -271,6 +275,8 @@ export default {
               wx_avatarUrl: userInfo.avatarUrl,
               wx_city: userInfo.city
             });
+            userInfo = mpvue.getStorageSync("userInfo");
+            vm.userInfo = userInfo;
             mpvue.setStorageSync("userid", obj.Id);
             vm.form.phone = "";
             vm.form.code = "";

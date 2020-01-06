@@ -1230,9 +1230,92 @@ const $toast = (title,icon,time)=>{
     duration: time || 1000
   });
 }
+/**
+ * @function 计算时间差
+ * @start_time 开始时间
+ * @end_time 结束时间
+ * @format 输出格式，默认 剩余DD天hh时mm分ss秒SSSS毫秒
+ * @units 输出时间单位，默认 无，可选 天、时、分、秒、毫秒
+ */
+const getTimeDiff = (o = {}) => {
+  let start_time = o.start_time || new Date()
+  let end_time = o.end_time || new Date()
+  let units = o.units
+  let format = o.format || '剩余DD天hh时mm分ss秒SSS毫秒'
+  let timeDiff = end_time.getTime() - start_time.getTime();
+  //取天的余数
+  let _time_d = timeDiff % 86400000;
+  //获取相差天数
+  let _d = (timeDiff - _time_d) / 86400000;
+  //优先级 输出单位优先
+  if (units) {
+      let run = "";
+      switch (units) {
+          case '天':
+              run = _d;
+              break;
+          case '时':
+              run = (timeDiff - (timeDiff % 3600000)) / 3600000;
+              break;
+          case '分':
+              run = (timeDiff - (timeDiff % 60000)) / 60000;
+              break;
+          case '秒':
+              run = (timeDiff - (timeDiff % 1000)) / 1000;
+              break;
+          case '毫秒':
+              run = timeDiff;
+              break;
+      }
+      return run;
+  } else {
+      //取小时的余数
+      let _time_h = _time_d % 3600000;
+      //获取相差小时
+      let _h = (_time_d - _time_h) / 3600000;
+      //取分钟的余数
+      let _time_m = _time_h % 60000;
+      //获取相差分钟
+      let _m = (_time_h - _time_m) / 60000;
+      //取秒的余数
+      let _time_s = _time_m % 1000;
+      //获取相差秒
+      let _s = (_time_m - _time_s) / 1000;
+      //取毫秒的余数
+      let _time_S = _time_s % 1;
+      //获取相差毫秒
+      let _S = (_time_s - _time_S) / 1;
+      let _date = {
+          "D+": _d,
+          "h+": _h,
+          "m+": _m,
+          "s+": _s,
+      };
+      let _fmt = format;
+      if (/(S+)/.test(_fmt)) {
+          let _value = (_S + "").substr(4 - RegExp.$1.length);
+          if (String(_value).length == 1) {
+              _value = '00' + _value;
+          } else if (String(_value).length == 2) {
+              _value = '0' + _value;
+          }
+          _fmt = _fmt.replace(RegExp.$1, _value);
+      }
+      for (let item in _date) {
+          //判断是否存在关键字
+          if (new RegExp("(" + item + ")").test(_fmt)) {
+              //将对应的关键字换成对应的时间
+              let _value = (RegExp.$1.length == 1) ? (_date[item]) : (("00" + _date[item]).substr(("" + _date[item]).length));
+              _fmt = _fmt.replace(RegExp.$1, _value);
+          }
+      }
+      return _fmt;
+  }
+}
 export default {
   getSign,
   format,
   cityData,
-  $toast
+  $toast,
+  getTimeDiff
 };

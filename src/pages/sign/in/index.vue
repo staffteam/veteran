@@ -65,6 +65,7 @@
         </li>
       </ul>
       <div class="notdata" v-if="signInListData.length==0">- 暂无课程数据 -</div>
+      <!-- {{testJson}} -->
       <!-- <load-data v-if="signInListData.length>0" :isLoading="isLoading" :isNotData="isNotData" /> -->
     </scroll-view>
   </div>
@@ -95,6 +96,7 @@ export default {
       courseData: [],
       isSignInData: {},
       staySignInData: {},
+      testJson:'',
       theMonth: "",
       theisLater: false,
       isOutTime: {},
@@ -146,7 +148,6 @@ export default {
       let month = date.getMonth() + 1;
       this.signInDate = `${year}年${month}月`;
       this.theMonth = `${year}-${+month > 9 ? month : "0" + month}`;
-      this.getDataLog(this.theMonth);
       this.dateObj = { year: year, month: month };
       let thisDate = new Date();
       if (isThis) {
@@ -170,6 +171,7 @@ export default {
       for (let i = 0; i < _day_ - 1; i++) {
         this.firstDay.push({ num: i, id: `${year}_${month}_${i}` });
       }
+      this.getDataLog(this.theMonth);
     },
     getData(day) {
       let vm = this;
@@ -187,6 +189,7 @@ export default {
               value.SignInTime = `${_arr1[0]}:${_arr1[1]}`;
               let _arr2 = value.SignOutTime.split(":");
               value.SignOutTime = `${_arr2[0]}:${_arr2[1]}`;
+              value.StartTime = value.StartTime.replace(/\-/g,"\/")
               //判断是否是老师
               if (vm.isAdmin) {
                 //获取签到精准时间
@@ -222,6 +225,7 @@ export default {
     getTheDay(day, isLater) {
       this.theDay = day;
       this.theisLater = isLater ? true : false;
+      this.signInListData = [];
       this.getData(day);
     },
     getDataLog(date) {
@@ -238,18 +242,21 @@ export default {
           if (!vm.isAdmin) {
             vm.courseData = res.Data;
             let _json = {},
-              stayJson = {};
+              stayJson = {},
+              testJson ={};
             let theDate = new Date();
             vm.courseData.forEach(value => {
               //获取日期中的天数
               let day = value.Date.split(" ")[0].split("-")[2];
               _json[day] = value.IsSignIn;
-              let _date = new Date(value.Date);
+              let _date = new Date(value.Date.replace(/\-/g,"\/"));
+              testJson[value.Date] = _date.getTime();
               if (_date.getTime() - theDate.getTime() > 0) {
                 stayJson[day] = true;
               }
             });
             vm.staySignInData = stayJson;
+            vm.testJson = JSON.stringify(testJson);
             vm.isSignInData = _json;
           } else {
             vm.courseData = res.Data;
@@ -288,7 +295,7 @@ export default {
       }
     });
     let userInfo = mpvue.getStorageSync("userInfo");
-    this.isAdmin = userInfo.IsTeacher;
+    this.isAdmin = userInfo.IsTeacher==null?false:true;
     this.signInListData = [];
     this.getDates();
   },
