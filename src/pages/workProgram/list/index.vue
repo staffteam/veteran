@@ -81,7 +81,8 @@ export default {
       vm.$api
         .$signGet("文章列表", {
           enCode: vm.tagCheck,
-          page: vm.pageNum
+          page: vm.pageNum,
+          userid: mpvue.getStorageSync("userId")
         })
         .then(res => {
           if (res.Data.length > 0) {

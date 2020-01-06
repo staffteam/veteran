@@ -139,6 +139,10 @@ export default {
       }
     });
   },
+  onPullDownRefresh: function() {
+    let vm = this;
+    vm.getData();
+  },
   onLoad(o) {
     let vm = this;
     vm.pid = o.id;

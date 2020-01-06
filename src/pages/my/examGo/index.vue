@@ -64,7 +64,8 @@ export default {
       overtime: false,
       warn: false,
       checks: {},
-      isAnalysis: false
+      isAnalysis: false,
+      timeObj: {}
     };
   },
   methods: {
@@ -167,7 +168,7 @@ export default {
         isPass = false,
         time = 0,
         examArr = [],
-        examJson={};
+        examJson = {};
       Object.keys(vm.checks).forEach(item => {
         let ids = [];
         vm.checks[item].forEach(value => {
@@ -212,7 +213,7 @@ export default {
               //选中正确，记分
               score = score + vm.checks[item][0].Score;
               examJson[item] = true;
-            }else{
+            } else {
               examJson[item] = false;
             }
           }
@@ -222,12 +223,12 @@ export default {
           SubjectOptionId: ids.join(",")
         });
       });
-      let examResultList=[];
+      let examResultList = [];
       vm.exam.TopicList.forEach(value => {
-        if(examJson[value.Id]){
-          examResultList.push({Id:value.Id,IsRight:true});
-        }else{
-          examResultList.push({Id:value.Id,IsRight:false});
+        if (examJson[value.Id]) {
+          examResultList.push({ Id: value.Id, IsRight: true });
+        } else {
+          examResultList.push({ Id: value.Id, IsRight: false });
         }
       });
       //判断得分是否大于等于及格分数
@@ -250,7 +251,13 @@ export default {
           icon: "success"
         });
         setTimeout(_ => {
-          mpvue.setStorageSync("examPrams", {...prams,Name:vm.exam.Name,PassScore:vm.exam.PassScore,examResultList:examResultList,MaxScore:vm.exam.Score});
+          mpvue.setStorageSync("examPrams", {
+            ...prams,
+            Name: vm.exam.Name,
+            PassScore: vm.exam.PassScore,
+            examResultList: examResultList,
+            MaxScore: vm.exam.Score
+          });
           mpvue.redirectTo({
             url: "../../my/examResult/main"
           });
@@ -270,6 +277,12 @@ export default {
   },
   onLoad(o) {
     let vm = this;
+    vm.countDown = {
+      h: "00",
+      m: "00",
+      s: "00"
+    };
+    clearInterval(vm.timeObj);
     this.$api
       .$signGet("科目详情", {
         id: o.id,
@@ -277,8 +290,8 @@ export default {
       })
       .then(res => {
         vm.exam = res.Data;
-        vm.exam.TopicList=vm.exam.TopicList.map(value => {
-          value.OptionList=value.OptionList.map(value2 => {
+        vm.exam.TopicList = vm.exam.TopicList.map(value => {
+          value.OptionList = value.OptionList.map(value2 => {
             value2.IsMultiple = value.IsMultiple;
             value2.Score = value.Score;
             value2.optionIndex = value2.Content.split("：")[0];
@@ -299,7 +312,7 @@ export default {
           vm.countDown.m = +_time > 9 ? _time : "0" + _time;
           vm.countDown.s = "00";
         }
-        let timeObj = setInterval(_ => {
+        vm.timeObj = setInterval(_ => {
           let { h, m, s } = vm.countDown;
           if (s == 0) {
             if (h == 0 && m == 1) {
@@ -321,7 +334,7 @@ export default {
             if (h == 0 && m == 0 && s == 1) {
               //小于一小时 倒计时结束
               vm.commonMsg = true;
-              clearInterval(timeObj);
+              clearInterval(vm.timeObj);
               setTimeout(_ => {
                 vm.goFinish(true);
               }, 2000);
@@ -464,7 +477,7 @@ export default {
         border: 2rpx solid #e5e5e5;
         color: #999;
       }
-      &.finish{
+      &.finish {
         background-color: #e53330;
         color: white;
       }

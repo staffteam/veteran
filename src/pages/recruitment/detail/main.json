@@ -1,4 +1,6 @@
 {
-    "navigationBarTitleText": "军戎飞扬"
+    "navigationBarTitleText": "军戎飞扬",
+    "enablePullDownRefresh":true,
+    "backgroundTextStyle": "dark"
   }
   

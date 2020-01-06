@@ -54,7 +54,7 @@
         </div>
         <div class="test-item">
           <h2>考试内容</h2>
-          <div>
+          <div style="height:200rpx;">
             <h2>{{exam.Content}}</h2>
           </div>
         </div>
@@ -199,9 +199,13 @@ export default {
           float: right;
           text-align: center;
           h2{
-            line-height: 200rpx;
+            line-height: 40rpx;
             font-size: 32rpx;
             color: #666666;
+            display: inline-block;
+            transform: translateY(-50%);
+            position: relative;
+            top: 50%;
           }
           p{
             font-size: 30rpx;

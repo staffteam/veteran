@@ -70,7 +70,8 @@ export default {
       vm.$api
         .$signGet("文章列表", {
           enCode: 'cjwt',
-          page: vm.pageNum
+          page: vm.pageNum,
+          userid: mpvue.getStorageSync("userId")
         })
         .then(res => {
           if (res.Data.list.length > 0) {
