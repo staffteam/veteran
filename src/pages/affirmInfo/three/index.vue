@@ -65,7 +65,7 @@
     </div>
     <div class="error-correction" v-if="errorCorrection">
       <i class="iconfont icon-dui"></i>
-      <h2>提交成功</h2>
+      <h2>纠错信息提交成功</h2>
       <div>工作人员将会在3个工作日内审核您的申请，敬请留意</div>
       <p @click="affirmCorrection(true)">知道了</p>
     </div>
@@ -126,10 +126,6 @@ export default {
           SquadCaptain: this.userInfo.SquadCaptain,
           EnlistEndTime: this.userInfo.EnlistEndTime
         };
-        this.userInfo.SquadronNo = "";
-        this.userInfo.SquadronCaptain = "";
-        this.userInfo.SquadCaptain = "";
-        this.userInfo.EnlistEndTime = "";
       } else {
         this.isReadonly = true;
         this.userInfo.SquadronNo = this.hostInfo.SquadronNo;

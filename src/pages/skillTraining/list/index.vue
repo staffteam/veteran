@@ -63,7 +63,7 @@ export default {
         .$signGet("文章列表", {
           enCode: vm.tagCheck,
           page: vm.pageNum,
-          userid: mpvue.getStorageSync("userId")
+          userid: mpvue.getStorageSync("userid")
         })
         .then(res => {
           if (res.Data.length > 0) {

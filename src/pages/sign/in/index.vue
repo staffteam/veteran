@@ -175,6 +175,7 @@ export default {
     },
     getData(day) {
       let vm = this;
+      day = +day>9?day:'0'+day;
       this.signInListDay = day;
       this.$api
         .$signGet(vm.isAdmin ? "老师根据日期获取课程" : "根据日期获取课程", {

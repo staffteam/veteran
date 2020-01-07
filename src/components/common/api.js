@@ -37,7 +37,8 @@ const path = {
   '学员签到列表':`${api}/Member/GetMySignInlist`,
   '我的证书':`${api}/Member/GetMyDiploma`,
   '人才交流':`${api}/Company/GetRcjlCompanyList`,
-  '人才交流详情':`${api}/Company/GetRcjlRecruitList`
+  '人才交流详情':`${api}/Company/GetRcjlRecruitList`,
+  '用户协议':`${api}/Article/GetArticleDetailByEnCode?enCode=yhxy`
 };
 const load = {
   show() {
