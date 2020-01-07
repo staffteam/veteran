@@ -2,8 +2,8 @@
   <div>
     <div class="my-exam">
       <ul v-if="examListData.length>0">
-        <li v-for="item in examListData" :key="item.id" :class="item.IsPass?'on':''">
-          <a :href="item.StudentCount>0 && !item.IsPass?('../../my/examDetail/main?id='+item.Id):''">
+        <li v-for="item in examListData" :key="item.id" :class="item.IsPass || !item.StudentCount?'on':''">
+          <a :href="item.StudentCount && !item.IsPass?('../../my/examDetail/main?id='+item.Id):''">
             <div class="l">
               <p>
                 <img :src="item.Image || '/static/images/exam-back.png'" mode="aspectFill" />
@@ -117,6 +117,7 @@ export default {
       box-shadow: 0px 0 20rpx 0px rgba(0, 0, 0, 0.1);
       border-radius: 10rpx;
       position: relative;
+      height: 200rpx;
       &.on {
         a {
           div.c {

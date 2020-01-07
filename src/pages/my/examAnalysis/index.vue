@@ -31,7 +31,9 @@
         <div class="exam-go-analysis">
           <h2>题目解析</h2>
           <p>正确答案：{{item.success}}</p>
-          <div>解析：{{item.Explain}}</div>
+          <div class="exam-analysis-content" v-if="item.Explain">
+            <wxParse :content="item.Explain" />
+          </div>
         </div>
       </div>
     </template>
@@ -45,9 +47,15 @@
 </template>
 
 <script>
+import wxParse from "mpvue-wxparse";
+
 export default {
+  components: {
+    wxParse
+  },
   data() {
     return {
+      optionsArr: ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K"],
       isFirst: true,
       isFinish: false,
       commonMsg: false,
@@ -132,9 +140,9 @@ export default {
       .then(res => {
         vm.exam = res.Data;
         vm.exam.TopicList = vm.exam.TopicList.map(value => {
-          value.OptionList = value.OptionList.map(value2 => {
-            value2.check = examJson[value.Id][value2.Id];
-            value2.optionIndex = value2.Content.split("：")[0];
+          value.OptionList = value.OptionList.map((value2,_index) => {
+            value2.check = examJson[value.Id]?examJson[value.Id][value2.Id]:false;
+            value2.optionIndex = value2.Content.split("：")[0]==""?vm.optionsArr[_index]:value2.Content.split("：")[0];
             value2.optionText = value2.Content.split("：")[1];
             if (value2.IsRight) {
               if (value.success) {
@@ -171,6 +179,7 @@ export default {
 </script>
 
 <style lang="less" scoped>
+@import url("~mpvue-wxparse/src/wxParse.css");
 .exam-go {
   .exam-go-top {
     height: 88rpx;
@@ -240,14 +249,14 @@ export default {
           &.success {
             p {
               background-color: #51c512;
-              border: 1px solid #51c512;
+              border: 1rpx solid #51c512;
               color: white;
             }
           }
           &.error {
             p {
               background-color: #ff5a5a;
-              border: 1px solid #ff5a5a;
+              border: 1rpx solid #ff5a5a;
               color: white;
             }
           }
@@ -255,7 +264,7 @@ export default {
             width: 56rpx;
             height: 56rpx;
             float: left;
-            border: 1px solid #ffc247;
+            border: 1rpx solid #ffc247;
             border-radius: 50%;
             text-align: center;
             line-height: 56rpx;
