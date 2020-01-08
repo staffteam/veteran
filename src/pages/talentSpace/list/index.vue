@@ -38,7 +38,7 @@ export default {
           icon: "/static/images/talentSpace2.png"
         },
         {
-          title: "金融项目",
+          title: "金融服务",
           url: "../../talentSpace/detail/main",
           icon: "/static/images/talentSpace3.png"
         }

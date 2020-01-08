@@ -49,7 +49,7 @@ export default {
       tagCheck: "tzwj",
       tagData: [
         { id: "tzwj", title: "通知文件" },
-        { id: "zxsjrk", title: "作息时间入口" },
+        { id: "zxsjrk", title: "作息时间" },
         { id: "rygh", title: "人员规划" }
       ],
       workProgramData: []
