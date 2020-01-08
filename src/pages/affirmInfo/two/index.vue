@@ -112,22 +112,18 @@ export default {
         vm.showHint("手机号格式有误");
       } else {
         if (!this.isReadonly) {
-          this.errorCorrection = true;
+          vm.$api
+            .$signPost("纠错", {
+              Name: vm.userInfo.Name,
+              IdCard: vm.userInfo.IdCard,
+              Phone: vm.userInfo.Phone,
+              StudentId: vm.userInfo.userid
+            })
+            .then(res => {
+              vm.errorCorrection = true;
+            });
         } else {
-          if (!this.isReadonly) {
-            vm.$api
-              .$signPost("纠错", {
-                Name: vm.userInfo.Name,
-                IdCard: vm.userInfo.IdCard,
-                Phone: vm.userInfo.Phone,
-                StudentId: vm.userInfo.userid
-              })
-              .then(res => {
-                vm.errorCorrection = true;
-              });
-          } else {
-            vm.affirmCorrection();
-          }
+          vm.affirmCorrection();
         }
       }
     },
@@ -177,7 +173,7 @@ export default {
     height: 100vh;
     img {
       width: 100%;
-      &:last-child{
+      &:last-child {
         position: absolute;
         bottom: 0;
         left: 0;

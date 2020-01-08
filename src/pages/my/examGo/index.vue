@@ -107,7 +107,6 @@ export default {
     },
     goCheck(item, items) {
       let vm = this;
-      debugger;
       vm.exam.TopicList = vm.exam.TopicList.map(value => {
         if (value.Id == item.Id) {
           value.OptionList = value.OptionList.map(value2 => {
@@ -284,6 +283,15 @@ export default {
       m: "00",
       s: "00"
     };
+    vm.examinationNum = 1;
+    vm.isFirst = true;
+    vm.isFinish = false;
+    vm.commonMsg = false;
+    vm.overtime = false;
+    vm.warn = false;
+    vm.checks = {};
+    vm.isAnalysis = false;
+    vm.exam = {};
     clearInterval(vm.timeObj);
     this.$api
       .$signGet("科目详情", {
@@ -293,10 +301,13 @@ export default {
       .then(res => {
         vm.exam = res.Data;
         vm.exam.TopicList = vm.exam.TopicList.map(value => {
-          value.OptionList = value.OptionList.map((value2,_index) => {
+          value.OptionList = value.OptionList.map((value2, _index) => {
             value2.IsMultiple = value.IsMultiple;
             value2.Score = value.Score;
-            value2.optionIndex = value2.Content.split("：")[0]==""?vm.optionsArr[_index]:value2.Content.split("：")[0];
+            value2.optionIndex =
+              value2.Content.split("：")[0] == ""
+                ? vm.optionsArr[_index]
+                : value2.Content.split("：")[0];
             value2.optionText = value2.Content.split("：")[1];
             return value2;
           });

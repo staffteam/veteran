@@ -211,7 +211,7 @@ export default {
           this.endSignTime = `上午${end_h}:${end_m}`;
         }
         let date = new Date();
-        let signTime = new Date(data.StartTime.replace(/\-/g,"\/"));
+        let signTime = new Date(data.StartTime.replace(/\-/g, "/"));
         let SignInTime = new Date(
           `${signTime.getFullYear()}/${signTime.getMonth() +
             1}/${signTime.getDate()} ${data.SignInTime}`
@@ -336,8 +336,27 @@ export default {
             success: function(data) {
               mpvue.hideLoading();
               console.log(data.result);
-              vm.locateContent = data.result.formatted_addresses.recommend;
-              vm.signScope = vm.info.locate == vm.locateContent;
+              let { city, district } = data.result.address_component;
+              let { title } = data.result.address_reference.landmark_l2;
+              let { recommend } = data.result.formatted_addresses;
+              if (recommend.indexOf(city) == -1) {
+                recommend = city + recommend;
+              }
+              let landmark_l2 = city + district + title;
+              landmark_l2 = landmark_l2.split("(")[0];
+              recommend = recommend.split("(")[0];
+              if (vm.info.locate.indexOf(recommend) == -1) {
+                if (vm.info.locate.indexOf(landmark_l2) >= 0) {
+                  vm.locateContent = landmark_l2;
+                  vm.signScope = true;
+                } else {
+                  vm.signScope = false;
+                  vm.locateContent = recommend;
+                }
+              } else {
+                vm.signScope = true;
+                vm.locateContent = recommend;
+              }
             }
           });
         }
