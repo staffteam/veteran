@@ -160,6 +160,9 @@ export default {
             })
             .then(res => {
               vm.errorCorrection = true;
+              mpvue.removeStorageSync("userInfo");
+              mpvue.removeStorageSync("userid");
+              mpvue.removeStorageSync("oneLogin");
             });
         } else {
           vm.affirmCorrection();
@@ -169,8 +172,9 @@ export default {
     affirmCorrection(is) {
       let vm = this;
       if (is) {
-        mpvue.removeStorageSync("userInfo");
-        mpvue.removeStorageSync("userid");
+        vm.errorCorrection = false;
+        vm.userInfo = {};
+        vm.isReadonly = true;
         mpvue.switchTab({
           url: "../../index/main"
         });
@@ -216,6 +220,10 @@ export default {
       if (time) {
         this.userInfo.EnlistEndTime = time.split(" ")[0];
       }
+    } else {
+      mpvue.switchTab({
+        url: "../../index/main"
+      });
     }
   },
   onLoad() {
