@@ -56,7 +56,7 @@
     </div>
     <div class="error-correction" v-if="errorCorrection">
       <i class="iconfont icon-dui"></i>
-      <h2>提交成功</h2>
+      <h2>纠错信息提交成功</h2>
       <div>工作人员将会在3个工作日内审核您的申请，敬请留意</div>
       <p @click="affirmCorrection(true)">知道了</p>
     </div>
@@ -130,8 +130,6 @@ export default {
           Areas: this.userInfo.Areas,
           SchoolName: this.userInfo.SchoolName
         };
-        this.userInfo.Areas = "";
-        this.userInfo.SchoolName = "";
       } else {
         this.isReadonly = true;
         this.userInfo.Areas = this.hostInfo.Areas;

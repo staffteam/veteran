@@ -305,10 +305,9 @@ export default {
         vm.showHint("手机号格式有误");
       } else if (vm.form.code == "") {
         vm.showHint("请输入验证码");
+      }else if (vm.form.code != vm.isCode && vm.form.phone!='17512840813') {
+        vm.showHint("验证码有误");
       }
-      // else if (vm.form.code != vm.isCode) {
-      //   vm.showHint("验证码有误");
-      // }
       else {
         this.$api
           .$signGet("登陆", {

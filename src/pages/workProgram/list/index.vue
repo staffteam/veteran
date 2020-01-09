@@ -49,7 +49,7 @@ export default {
       tagCheck: "tzwj",
       tagData: [
         { id: "tzwj", title: "通知文件" },
-        { id: "zxsjrk", title: "作息时间入口" },
+        { id: "zxsjrk", title: "作息时间" },
         { id: "rygh", title: "人员规划" }
       ],
       workProgramData: []
@@ -82,7 +82,7 @@ export default {
         .$signGet("文章列表", {
           enCode: vm.tagCheck,
           page: vm.pageNum,
-          userid: mpvue.getStorageSync("userId")
+          userid: mpvue.getStorageSync("userid")
         })
         .then(res => {
           if (res.Data.length > 0) {

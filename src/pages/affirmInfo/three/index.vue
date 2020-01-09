@@ -30,6 +30,15 @@
             />
           </div>
           <div class="item">
+            <span>分队编号</span>
+            <input
+              type="text"
+              v-model="userInfo.SquadNo"
+              placeholder-style="color:#e53330;"
+              :disabled="isReadonly"
+            />
+          </div>
+          <div class="item">
             <span>分&ensp;队&ensp;长</span>
             <input
               type="text"
@@ -65,7 +74,7 @@
     </div>
     <div class="error-correction" v-if="errorCorrection">
       <i class="iconfont icon-dui"></i>
-      <h2>提交成功</h2>
+      <h2>纠错信息提交成功</h2>
       <div>工作人员将会在3个工作日内审核您的申请，敬请留意</div>
       <p @click="affirmCorrection(true)">知道了</p>
     </div>
@@ -124,18 +133,16 @@ export default {
           SquadronNo: this.userInfo.SquadronNo,
           SquadronCaptain: this.userInfo.SquadronCaptain,
           SquadCaptain: this.userInfo.SquadCaptain,
-          EnlistEndTime: this.userInfo.EnlistEndTime
+          EnlistEndTime: this.userInfo.EnlistEndTime,
+          SquadNo: this.userInfo.SquadNo
         };
-        this.userInfo.SquadronNo = "";
-        this.userInfo.SquadronCaptain = "";
-        this.userInfo.SquadCaptain = "";
-        this.userInfo.EnlistEndTime = "";
       } else {
         this.isReadonly = true;
         this.userInfo.SquadronNo = this.hostInfo.SquadronNo;
         this.userInfo.SquadronCaptain = this.hostInfo.SquadronCaptain;
         this.userInfo.SquadCaptain = this.hostInfo.SquadCaptain;
         this.userInfo.EnlistEndTime = this.hostInfo.EnlistEndTime;
+        this.userInfo.SquadNo= this.hostInfo.SquadNo
       }
     },
     gonext() {
@@ -144,6 +151,8 @@ export default {
         vm.showHint("请输入中队编号");
       } else if (vm.userInfo.SquadronCaptain == "") {
         vm.showHint("请输入中队长姓名");
+      } else if (vm.userInfo.SquadNo == "") {
+        vm.showHint("请输入分队编号");
       } else if (vm.userInfo.SquadCaptain == "") {
         vm.showHint("请输入分队长姓名");
       } else if (vm.userInfo.EnlistEndTime == "") {
@@ -156,6 +165,7 @@ export default {
               SquadronCaptain: vm.userInfo.SquadronCaptain,
               SquadCaptain: vm.userInfo.SquadCaptain,
               EnlistEndTime: vm.userInfo.EnlistEndTime,
+              SquadNo:vm.userInfo.SquadNo,
               StudentId: vm.userInfo.userid
             })
             .then(res => {
@@ -270,7 +280,7 @@ export default {
     .login-main {
       position: relative;
       z-index: 9;
-      padding: 260rpx 120rpx 0;
+      padding: 160rpx 120rpx 0;
       .title {
         font-size: 28rpx;
         color: rgba(168, 125, 87, 1);

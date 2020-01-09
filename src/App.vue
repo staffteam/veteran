@@ -247,4 +247,8 @@ button.userLogin {
     }
   }
 }
+
+.exam-go .exam-go-main .exam-go-analysis .exam-analysis-content view,.exam-go .exam-go-main .exam-go-analysis .exam-analysis-content text{
+  font-size:30rpx !important;
+}
 </style>
