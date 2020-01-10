@@ -66,14 +66,14 @@
 				},
 				{
 					"id": -1,
-					"name": "课程直播",
+					"name": "课程回放",
 					"pathName": "pages/coursePlayback/main",
 					"query": "",
 					"scene": null
 				},
 				{
 					"id": -1,
-					"name": "课程直播详情",
+					"name": "课程回放详情",
 					"pathName": "pages/courseDetail/main",
 					"query": "",
 					"scene": null
