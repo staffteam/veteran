@@ -13,6 +13,8 @@
     "pages/my/help/main",
     "pages/my/share/main",
     "pages/my/sign/main",
+    "pages/my/message/main",
+    "pages/my/messageDetail/main",
     "pages/agenda/list/main",
     "pages/agenda/detail/main",
     "pages/ceremony/list/main",

@@ -43,12 +43,22 @@
       <scroll-view scroll-y="false" class="main-list">
         <ul>
           <li v-for="item in memberListData" :key="item.id">
-            <a :href="item.url" v-if="item.icon != 'icon-send'">
+            <a :href="item.url" v-if="item.icon != 'icon-send' && item.icon != 'icon-xiaoxi'">
               <h2>
                 <i :class="'iconfont '+item.icon"></i>
                 {{item.title}}
               </h2>
               <i class="iconfont icon-you1"></i>
+            </a>
+            <a :href="item.url" v-if="item.icon == 'icon-xiaoxi'">
+              <div>
+                <h2>
+                  <i :class="'iconfont '+item.icon"></i>
+                  {{item.title}}
+                </h2>
+                <i class="iconfont icon-you1"></i>
+                <my-badge content="1" extClass="msg-badge" />
+              </div>
             </a>
             <div v-if="item.icon == 'icon-send'">
               <button open-type="share" class="btn-share"></button>
@@ -128,7 +138,12 @@ export default {
     vm.userInfo = userInfo;
     if (userInfo.IsTeacher) {
       vm.memberListData = [
-        {
+         {
+          url: "../my/message/main",
+          icon: "icon-xiaoxi",
+          title: "消息提醒",
+          id: "0"
+        },{
           url: "../my/aboutus/main",
           icon: "icon-guanyu",
           title: "关于我们",
@@ -160,6 +175,11 @@ export default {
           icon: "icon-jieyezhengshu1",
           title: "结业证书",
           id: "0"
+        },{
+          url: "../my/message/main",
+          icon: "icon-xiaoxi",
+          title: "消息提醒",
+          id: "99"
         },
         {
           url: "../my/aboutus/main",
@@ -257,6 +277,7 @@ export default {
           display: block;
           width: 100%;
           height: 100%;
+          position: relative;
         }
       }
     }
@@ -296,6 +317,7 @@ export default {
           a {
             display: block;
             height: 100%;
+            position: relative;
           }
           h2 {
             float: left;
@@ -319,5 +341,14 @@ export default {
       }
     }
   }
+}
+</style>
+
+<style>
+.msg-badge{
+  position: absolute;
+  right: 30rpx;
+  top: 50%;
+  transform: translateY(-50%);
 }
 </style>

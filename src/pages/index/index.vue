@@ -4,7 +4,7 @@
       <p>
         <img src="/static/images/home-back.jpg" mode="widthFix" />
       </p>
-      <div class="title" v-if="userInfo.SchoolName" >欢迎来到「{{userInfo.SchoolName}}」</div>
+      <div class="title" v-if="userInfo.SchoolName">欢迎来到「{{userInfo.SchoolName}}」</div>
       <ul>
         <template v-for="(item,index) in homeNavData">
           <li
@@ -87,7 +87,7 @@ export default {
       isCode: "",
       timeObj: {},
       userInfo: {
-        SchoolName:""
+        SchoolName: ""
       }
     };
   },
@@ -305,10 +305,9 @@ export default {
         vm.showHint("手机号格式有误");
       } else if (vm.form.code == "") {
         vm.showHint("请输入验证码");
-      }else if (vm.form.code != vm.isCode && vm.form.phone!='17512840813') {
+      } else if (vm.form.code != vm.isCode && vm.form.phone != "17512840813") {
         vm.showHint("验证码有误");
-      }
-      else {
+      } else {
         this.$api
           .$signGet("登陆", {
             value: String(vm.form.phone)
@@ -353,6 +352,17 @@ export default {
             });
         }
       }
+    },
+    getMsg() {
+      mpvue.setTabBarBadge({
+        index: 1,
+        text: "9"
+      });
+      if (false) {
+        mpvue.removeTabBarBadge({
+          index: 1
+        });
+      }
     }
   },
   created() {
@@ -372,6 +382,7 @@ export default {
         timingFunc: "easeIn"
       }
     });
+    vm.getMsg();
     vm.getNavData();
     let oneLogin = mpvue.getStorageSync("oneLogin");
     let userInfo = mpvue.getStorageSync("userInfo");
@@ -439,8 +450,8 @@ export default {
     position: relative;
     z-index: 9;
     text-align: center;
-    font-size:45rpx;
-    font-style:italic;
+    font-size: 45rpx;
+    font-style: italic;
     font-weight: 600;
     color: #e53330;
     padding: 40rpx 0 30rpx;
