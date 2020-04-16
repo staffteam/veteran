@@ -1,14 +1,13 @@
 <template>
   <div class="msg-main">
-    <div  class="my-msg">
+    <div class="my-msg">
       <div class="list" v-for="(item,index) in msgListData" :key="index">
-        <div class="title">{{item.date}}</div>
+        <div class="title">{{item.key}}</div>
         <ul>
-          <li v-for="(items,i) in item.list" :key="i">
+          <li v-for="(items,i) in item.value" :key="i">
             <a :href="'../../my/messageDetail/main?id='+items.Id">
-              <h2 :class="'line '+(items.
-              colo?'on':'')">{{items.title}}</h2>
-              <p class="line">{{items.desc}}</p>
+              <h2 :class="'line '+(!items.IsRead?'on':'')">{{items.Title}}</h2>
+              <p class="line">{{items.Description}}</p>
               <div>
                 <span>查看详情</span>
                 <i class="iconfont icon-you1"></i>
@@ -31,58 +30,7 @@ export default {
       isGet: true,
       pageNum: 1,
       pageSize: 10,
-      msgListData: [
-        {
-          date: "2019-08-08 12:10",
-          list: [
-            {
-              title: "最新课程安排计划",
-              desc:
-                "最新课程安排计划最新课程安排计划最新课程安排最最新课程安排计划最新课程安排计划最新课程安排最",
-              Id: 0,
-              
-              colo: true
-            }
-          ]
-        },
-        {
-          date: "2019-08-06 12:10",
-          list: [
-            {
-              title: "最新课程安排计划",
-              desc:
-                "最新课程安排计划最新课程安排计划最新课程安排最最新课程安排计划最新课程安排计划最新课程安排最",
-              Id: 1,
-              
-              colo: false
-            },
-            {
-              title: "最新课程安排计划",
-              desc:
-                "最新课程安排计划最新课程安排计划最新课程安排最最新课程安排计划最新课程安排计划最新课程安排最",
-              Id: 2,
-              
-              colo: false
-            },
-            {
-              title: "最新课程安排计划",
-              desc:
-                "最新课程安排计划最新课程安排计划最新课程安排最最新课程安排计划最新课程安排计划最新课程安排最",
-              Id: 3,
-              
-              colo: false
-            },
-            {
-              title: "最新课程安排计划",
-              desc:
-                "最新课程安排计划最新课程安排计划最新课程安排最最新课程安排计划最新课程安排计划最新课程安排最",
-              Id: 4,
-              
-              colo: false
-            }
-          ]
-        }
-      ]
+      msgListData: []
     };
   },
   /**
@@ -99,8 +47,21 @@ export default {
     getData() {
       let vm = this;
       vm.isGet = false;
-      vm.isLoading = false;
-      vm.isNotData = true;
+      this.$api
+        .$signGet("消息列表", {
+          userid: mpvue.getStorageSync("userid"),
+          page: vm.pageNum
+        })
+        .then(res => {
+          if (res.Data.length > 0) {
+            vm.isLoading = false;
+            vm.isGet = true;
+            vm.msgListData = [...res.Data, ...vm.msgListData];
+          } else {
+            vm.isLoading = false;
+            vm.isNotData = true;
+          }
+        });
     }
   },
   onShow() {
@@ -112,24 +73,28 @@ export default {
         timingFunc: "easeIn"
       }
     });
+    this.isGet = true;
+    this.pageNum = 1;
+    this.pageSize = 10;
+    this.msgListData = [];
+    this.getData();
   },
   onLoad() {
     let vm = this;
-    this.getData();
   }
 };
 </script>
 
 <style lang="less" scoped>
-.msg-main{
-   background-color: #F9FAFB;
+.msg-main {
+  background-color: #f9fafb;
 }
 .my-msg {
   min-height: 100vh;
   padding: 30rpx;
   .list {
     margin-top: 30rpx;
-    &:first-child{
+    &:first-child {
       margin-top: 0;
     }
     .title {
@@ -149,47 +114,47 @@ export default {
         background: rgba(255, 255, 255, 1);
         border-radius: 8rpx;
         padding: 24rpx 32rpx 0;
-        &:first-child{
+        &:first-child {
           margin-top: 20rpx;
         }
-        h2{
+        h2 {
           font-size: 32rpx;
           font-weight: 600;
           line-height: 45rpx;
           height: 45rpx;
           position: relative;
-          &.on{
+          &.on {
             padding-left: 32rpx;
-            &::before{
+            &::before {
               position: absolute;
               width: 16rpx;
               height: 16rpx;
-              background-color: #E53330;
+              background-color: #e53330;
               border-radius: 50%;
               display: block;
-              content:'';
-              left:0;
-              top:50%;
+              content: "";
+              left: 0;
+              top: 50%;
               transform: translateY(-50%);
             }
           }
         }
-        p{
+        p {
           margin-top: 10rpx;
           font-size: 26rpx;
           color: #999999;
         }
-        div{
+        div {
           border-top: 1rpx solid #e5e5e5;
           height: 90rpx;
           line-height: 90rpx;
           margin-top: 20rpx;
-          span{
+          span {
             font-size: 28rpx;
             color: #666666;
             display: inline-block;
           }
-          i{
+          i {
             float: right;
             font-size: 26rpx;
             color: #cccccc;

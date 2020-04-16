@@ -4,7 +4,7 @@
       <img src="/static/images/detail-back.jpg" mode="widthFix" />
     </p>
     <div class="detail-content wxparse-mains" v-if="detail.Content">
-      <wxParse :content="detail.Content" />
+      <rich-text :nodes="detail.Content"></rich-text>
     </div>
   </div>
 </template>

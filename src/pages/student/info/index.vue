@@ -17,12 +17,8 @@
     </div>
     <div class="form-line"></div>
     <div class="form-item">
-      <span>中队编号</span>
-      <div>{{info.SquadronNo }}</div>
-    </div>
-    <div class="form-item">
-      <span>分队编号</span>
-      <div>{{info.SquadNo}}</div>
+      <span>班级编号</span>
+      <div>{{info.ClassNo }}</div>
     </div>
     <div class="form-item">
       <span>上课签到</span>

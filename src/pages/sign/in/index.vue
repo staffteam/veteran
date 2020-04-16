@@ -381,7 +381,7 @@ export default {
             color: white !important;
           }
           &:before {
-            display: none;
+            display: none !important;
           }
         }
         &.the {

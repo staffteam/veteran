@@ -38,7 +38,11 @@ const path = {
   '我的证书':`${api}/Member/GetMyDiploma`,
   '人才交流':`${api}/Company/GetRcjlCompanyList`,
   '人才交流详情':`${api}/Company/GetRcjlRecruitList`,
-  '用户协议':`${api}/Article/GetArticleDetailByEnCode?enCode=yhxy`
+  '用户协议':`${api}/Article/GetArticleDetailByEnCode?enCode=yhxy`,
+  '未读消息':`${api}/SysMessage/GetCount`,
+  '消息列表':`${api}/SysMessage/GetList`,
+  '消息详情':`${api}/SysMessage/GetDetail`,
+  '投递简历':`${api}/Company/ResumeSend`
 };
 const load = {
   show() {

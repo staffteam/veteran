@@ -49,8 +49,8 @@ export default {
       tagCheck: "tzwj",
       tagData: [
         { id: "tzwj", title: "通知文件" },
-        { id: "zxsjrk", title: "作息时间" },
-        { id: "rygh", title: "人员规划" }
+        { id: "zxsjrk", title: "时间安排" },
+        // { id: "rygh", title: "人员规划" }
       ],
       workProgramData: []
     };
@@ -149,7 +149,7 @@ export default {
       overflow: hidden;
       li {
         display: inline-block;
-        width: 33.33vw;
+        width: 50vw;
         text-align: center;
         font-size: 32rpx;
         line-height: 96rpx;

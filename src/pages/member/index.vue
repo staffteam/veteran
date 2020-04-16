@@ -10,7 +10,7 @@
         </p>
         <div>
           <h2>{{userInfo.Name}}</h2>
-          <p v-if="!userInfo.IsTeacher">{{userInfo.SquadronNo}}退役军人</p>
+          <p v-if="!userInfo.IsTeacher">{{userInfo.ClassNo}}</p>
         </div>
       </div>
     </div>
@@ -57,7 +57,7 @@
                   {{item.title}}
                 </h2>
                 <i class="iconfont icon-you1"></i>
-                <my-badge content="1" extClass="msg-badge" />
+                <my-badge v-if="msgNum" :content="msgNum" extClass="msg-badge" />
               </div>
             </a>
             <div v-if="item.icon == 'icon-send'">
@@ -87,7 +87,8 @@ export default {
     return {
       userInfo: {},
       memberListData: [],
-      userStatus: 1
+      userStatus: 1,
+      msgNum:0
     };
   },
   methods: {
@@ -100,6 +101,23 @@ export default {
       mpvue.switchTab({
         url: "../index/main"
       });
+    },
+    getMsg() {
+      let vm = this;
+      let userid = mpvue.getStorageSync("userid");
+      if (userid) {
+        vm.$api
+          .$signGet("未读消息", {
+            userid: mpvue.getStorageSync("userid")
+          })
+          .then(res => {
+            if (res.Data) {
+              vm.msgNum = res.Data;
+            }else{
+              vm.msgNum = 0;
+            }
+          });
+      }
     }
   },
   onShow() {
@@ -123,11 +141,15 @@ export default {
           vm.userStatus = 2;
         }
       });
+      mpvue.removeTabBarBadge({
+        index:1
+      });
+      this.getMsg();
   },
   onShareAppMessage: function() {
     return {
-      title: "军戎飞扬",
-      desc: "军戎飞扬",
+      title: "博茂择优",
+      desc: "博茂择优",
       path: "/pages/index/main",
       imageUrl: "/static/images/about-top.jpg"
     };
@@ -143,7 +165,8 @@ export default {
           icon: "icon-xiaoxi",
           title: "消息提醒",
           id: "0"
-        },{
+        },
+        {
           url: "../my/aboutus/main",
           icon: "icon-guanyu",
           title: "关于我们",
@@ -175,7 +198,8 @@ export default {
           icon: "icon-jieyezhengshu1",
           title: "结业证书",
           id: "0"
-        },{
+        },
+        {
           url: "../my/message/main",
           icon: "icon-xiaoxi",
           title: "消息提醒",

@@ -15,7 +15,7 @@
             <span>地&emsp;&emsp;区</span>
             <input
               type="text"
-              v-model="userInfo.Areas"
+              v-model="userInfo.City"
               placeholder-style="color:#e53330;"
               disabled="disabled"
               @click="openAreas"
@@ -109,7 +109,7 @@ export default {
       this.isOpenAreas = false;
       let _data = e.mp.detail.choosedData;
       this.areasValue = [{ name: _data[0].name }, { name: _data[1].name }];
-      this.userInfo.Areas = _data[0].name + " " + _data[1].name;
+      this.userInfo.City = _data[0].name + " " + _data[1].name;
     },
     areasCancle() {
       this.isOpenAreas = false;
@@ -127,18 +127,18 @@ export default {
       if (this.isReadonly) {
         this.isReadonly = false;
         this.hostInfo = {
-          Areas: this.userInfo.Areas,
+          City: this.userInfo.City,
           SchoolName: this.userInfo.SchoolName
         };
       } else {
         this.isReadonly = true;
-        this.userInfo.Areas = this.hostInfo.Areas;
+        this.userInfo.City = this.hostInfo.City;
         this.userInfo.SchoolName = this.hostInfo.SchoolName;
       }
     },
     gonext() {
       let vm = this;
-      if (vm.userInfo.Areas == "") {
+      if (vm.userInfo.City == "") {
         vm.showHint("请输入地区");
       } else if (vm.userInfo.SchoolName == "") {
         vm.showHint("请输入教学点");
@@ -146,7 +146,7 @@ export default {
         if (!this.isReadonly) {
           vm.$api
             .$signPost("纠错", {
-              Areas: vm.userInfo.Areas,
+              City: vm.userInfo.City,
               SchoolId: vm.userInfo.SchoolId,
               StudentId: vm.userInfo.userid
             })

@@ -33,9 +33,8 @@
             v-for="item in detail.RecruitList"
             :key="item.id"
             :class="item.check?'on':''"
-            @click="joinTab(item)"
           >
-            <div class="join-detail-t">
+            <div class="join-detail-t" @click="joinTab(item)">
               <h2 class="line">{{item.Title}}</h2>
               <i class="iconfont icon-you1"></i>
               <p>
@@ -44,7 +43,10 @@
               </p>
             </div>
             <div class="join-detail wxparse-mains" v-if="item.check">
-                <wxParse :content="item.Content" />
+              <wxParse :content="item.Content" />
+            </div>
+            <div class="join-btn" v-if="item.check">
+              <p @click="joinSubmit(item)">投递简历</p>
             </div>
           </li>
         </ul>
@@ -70,8 +72,8 @@ export default {
       tagCheck: 0,
       tagData: [{ label: "公司介绍", id: "0" }, { label: "招聘岗位", id: "1" }],
       detail: {
-        Detail:{},
-        RecruitList:[]
+        Detail: {},
+        RecruitList: []
       },
       pid: ""
     };
@@ -115,6 +117,21 @@ export default {
               vm.isNotData = true;
             }
           }
+        });
+    },
+    joinSubmit(obj) {
+      let vm = this;
+      vm.$api
+        .$signPost("投递简历", {
+          CompanyRecruitId: obj.Id,
+          StudentId: mpvue.getStorageSync("userid")
+        })
+        .then(res => {
+          mpvue.showToast({
+            title: "投递成功",
+            icon: "success",
+            duration: 1000
+          });
         });
     },
     joinTab(item) {
@@ -224,12 +241,12 @@ export default {
       ul {
         li {
           border-bottom: 1px solid #e5e5e5;
-          &.on{
-             .join-detail-t {
-               &>i{
-                 transform: rotate(90deg);
-               }
-             }
+          &.on {
+            .join-detail-t {
+              & > i {
+                transform: rotate(90deg);
+              }
+            }
           }
           .join-detail-t {
             height: 104rpx;
@@ -262,6 +279,22 @@ export default {
           .join-detail {
             padding: 20rpx 30rpx;
             border-top: 1px solid #e5e5e5;
+          }
+          .join-btn {
+            padding: 20rpx 30rpx;
+            border-top: 1px solid #e5e5e5;
+            overflow: hidden;
+            p {
+              width: 150rpx;
+              height: 50rpx;
+              background-color: #e53330;
+              color: white;
+              font-size: 24rpx;
+              text-align: center;
+              line-height: 50rpx;
+              float: right;
+              border-radius: 8rpx;
+            }
           }
         }
       }

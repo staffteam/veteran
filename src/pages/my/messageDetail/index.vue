@@ -6,7 +6,7 @@
         <p>{{detail.UpdateTime}}</p>
       </div>
       <div class="detail-content wxparse-mains" v-if="detail.Content">
-        <wxParse :content="detail.Content" />
+        <rich-text :nodes="detail.Content"></rich-text>
       </div>
     </div>
   </div>
@@ -42,11 +42,19 @@ export default {
   onLoad(o) {
     let vm = this;
     vm.$api
-      .$signGet("文章详情", {
-        id: o.id
+      .$signGet("消息详情", {
+        id: o.id,
+        userid: mpvue.getStorageSync("userid")
       })
       .then(res => {
         vm.detail = res.Data;
+        if (vm.detail.UpdateTime) {
+          let timeArr = vm.detail.UpdateTime.split(":");
+          vm.detail.UpdateTime = `${timeArr[0]}:${timeArr[1]}`;
+        }else{
+          let timeArr = vm.detail.ActiveTime.split(":");
+          vm.detail.UpdateTime = `${timeArr[0]}:${timeArr[1]}`;
+        }
       });
   }
 };
@@ -72,7 +80,7 @@ export default {
         margin-top: 12rpx;
       }
     }
-    .detail-content{
+    .detail-content {
       margin-top: 16rpx;
     }
   }

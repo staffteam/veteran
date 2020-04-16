@@ -8,28 +8,28 @@
       <div class="login-main">
         <div class="title">
           <i class="iconfont icon-dingweiweizhi"></i>
-          队伍归属验证
+          身份归属验证
         </div>
         <div class="form">
           <div class="item">
-            <span>中队编号</span>
+            <span>班级编号</span>
             <input
               type="text"
-              v-model="userInfo.SquadronNo"
+              v-model="userInfo.ClassNo"
               placeholder-style="color:#e53330;"
               :disabled="isReadonly"
             />
           </div>
           <div class="item">
-            <span>中&ensp;队&ensp;长</span>
+            <span>班级管理员</span>
             <input
               type="text"
-              v-model="userInfo.SquadronCaptain"
+              v-model="userInfo.ClassManager"
               placeholder-style="color:#e53330;"
               :disabled="isReadonly"
             />
           </div>
-          <div class="item">
+          <!-- <div class="item">
             <span>分队编号</span>
             <input
               type="text"
@@ -46,12 +46,21 @@
               placeholder-style="color:#e53330;"
               :disabled="isReadonly"
             />
-          </div>
+          </div> -->
           <div class="item">
-            <span>退役时间</span>
+            <span>管理员联系电话</span>
             <input
               type="text"
-              v-model="userInfo.EnlistEndTime"
+              v-model="userInfo.ManagerPhone"
+              placeholder-style="color:#e53330;"
+              :disabled="isReadonly"
+            />
+          </div>
+          <div class="item">
+            <span>报名学习时间</span>
+            <input
+              type="text"
+              v-model="userInfo.ApplyTime"
               placeholder-style="color:#e53330;"
               disabled="disabled"
               @click="openDate"
@@ -107,7 +116,7 @@ export default {
       let val = e.mp.detail.value;
       this.dateVal = val;
       setTimeout(_ => {
-        this.userInfo.EnlistEndTime = `${val[0]}-${val[1]}-${val[2]}`;
+        this.userInfo.ApplyTime = `${val[0]}-${val[1]}-${val[2]}`;
         this.isShow = false;
       }, 10);
     },
@@ -130,42 +139,39 @@ export default {
       if (this.isReadonly) {
         this.isReadonly = false;
         this.hostInfo = {
-          SquadronNo: this.userInfo.SquadronNo,
-          SquadronCaptain: this.userInfo.SquadronCaptain,
-          SquadCaptain: this.userInfo.SquadCaptain,
-          EnlistEndTime: this.userInfo.EnlistEndTime,
-          SquadNo: this.userInfo.SquadNo
+          ClassNo: this.userInfo.ClassNo,
+          ClassManager: this.userInfo.ClassManager,
+          ApplyTime: this.userInfo.ApplyTime,
+          ManagerPhone: this.userInfo.ManagerPhone
         };
       } else {
         this.isReadonly = true;
-        this.userInfo.SquadronNo = this.hostInfo.SquadronNo;
-        this.userInfo.SquadronCaptain = this.hostInfo.SquadronCaptain;
-        this.userInfo.SquadCaptain = this.hostInfo.SquadCaptain;
-        this.userInfo.EnlistEndTime = this.hostInfo.EnlistEndTime;
-        this.userInfo.SquadNo= this.hostInfo.SquadNo
+        this.userInfo.ClassNo = this.hostInfo.ClassNo;
+        this.userInfo.ClassManager = this.hostInfo.ClassManager;
+        this.userInfo.ApplyTime = this.hostInfo.ApplyTime;
+        this.userInfo.ManagerPhone= this.hostInfo.ManagerPhone
       }
     },
     gonext() {
       let vm = this;
-      if (vm.userInfo.SquadronNo == "") {
-        vm.showHint("请输入中队编号");
-      } else if (vm.userInfo.SquadronCaptain == "") {
-        vm.showHint("请输入中队长姓名");
-      } else if (vm.userInfo.SquadNo == "") {
-        vm.showHint("请输入分队编号");
-      } else if (vm.userInfo.SquadCaptain == "") {
-        vm.showHint("请输入分队长姓名");
-      } else if (vm.userInfo.EnlistEndTime == "") {
-        vm.showHint("请选择退役时间");
+      if (vm.userInfo.ClassNo == "") {
+        vm.showHint("请输入班级编号");
+      } else if (vm.userInfo.ClassManager == "") {
+        vm.showHint("请输入班级管理员");
+      } else if (vm.userInfo.ManagerPhone == "") {
+        vm.showHint("请输入管理员联系电话");
+      } else if (!/^1[3456789]\d{9}$/.test(vm.userInfo.ManagerPhone)) {
+        vm.showHint("管理员联系电话有误");
+      } else if (vm.userInfo.ApplyTime == "") {
+        vm.showHint("请选择学习时间");
       } else {
         if (!this.isReadonly) {
           vm.$api
             .$signPost("纠错", {
-              SquadronNo: vm.userInfo.SquadronNo,
-              SquadronCaptain: vm.userInfo.SquadronCaptain,
-              SquadCaptain: vm.userInfo.SquadCaptain,
-              EnlistEndTime: vm.userInfo.EnlistEndTime,
-              SquadNo:vm.userInfo.SquadNo,
+              ClassNo: vm.userInfo.ClassNo,
+              ClassManager: vm.userInfo.ClassManager,
+              ApplyTime: vm.userInfo.ApplyTime,
+              ManagerPhone:vm.userInfo.ManagerPhone,
               StudentId: vm.userInfo.userid
             })
             .then(res => {
@@ -226,9 +232,9 @@ export default {
     let userInfo = mpvue.getStorageSync("userInfo");
     if (userInfo) {
       this.userInfo = userInfo;
-      let time = this.userInfo.EnlistEndTime;
+      let time = this.userInfo.ApplyTime;
       if (time) {
-        this.userInfo.EnlistEndTime = time.split(" ")[0];
+        this.userInfo.ApplyTime = time.split(" ")[0];
       }
     } else {
       mpvue.switchTab({
@@ -280,7 +286,7 @@ export default {
     .login-main {
       position: relative;
       z-index: 9;
-      padding: 160rpx 120rpx 0;
+      padding: 160rpx 80rpx 0;
       .title {
         font-size: 28rpx;
         color: rgba(168, 125, 87, 1);
@@ -301,7 +307,7 @@ export default {
           }
           span {
             display: block;
-            width: 160rpx;
+            width: 220rpx;
             text-align: left;
             font-size: 28rpx;
             line-height: 96rpx;
@@ -313,7 +319,7 @@ export default {
             float: right;
             border: 2rpx solid #e53330;
             height: 92rpx;
-            width: calc(~"100% - 224rpx");
+            width: calc(~"100% - 284rpx");
             background: rgba(255, 253, 249, 1);
             border-radius: 4rpx;
             font-size: 28rpx;

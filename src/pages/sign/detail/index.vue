@@ -23,7 +23,7 @@
         </div>
         <div>
           <h2>退场时间 {{endSignTime}}</h2>
-          <p :class="SignOutStatus?'on':''">{{SignOutStatus?"已签到":"未签到"}}</p>
+          <p :class="SignOutStatus?'on':''">{{SignOutStatus?"已签退":"未签退"}}</p>
         </div>
       </div>
       <div class="sign">
@@ -69,7 +69,7 @@
             @click="endSign()"
           >
             <p>
-              <font>签到</font>
+              <font>签退</font>
             </p>
           </div>
           <!-- 上课已签到，下课已签到 -->
@@ -131,7 +131,9 @@ export default {
       signScope: false,
       commonMsg: false,
       isEndLeaveOut: false,
-      signData: ""
+      signData: "",
+      signTimeStart:{},
+      signTimeEnd:{}
     };
   },
   methods: {
@@ -160,6 +162,7 @@ export default {
     },
     // 下课签到
     endSign() {
+      let vm = this;
       if (this.signScope) {
         vm.$api
           .$signPost("学生签到", {
@@ -168,7 +171,7 @@ export default {
           })
           .then(res => {
             mpvue.showToast({
-              title: "签到成功！",
+              title: "签退成功！",
               icon: "success"
             });
             vm.SignOutStatus = true;
@@ -225,16 +228,16 @@ export default {
         this.allowStartSign = SignInTime.getTime() - date.getTime() <= _outTime;
         //计算当前时间与上课时间的时间差
         this.getStartCountDown(SignInTime, _outTime);
-        setInterval(_ => {
+        this.signTimeStart = setInterval(_ => {
           vm.getStartCountDown(SignInTime, _outTime);
         }, 1000);
         //判断是否迟到
         this.isStartbeLate = SignInTime.getTime() - date.getTime() < -_outTime;
         //判断是否已到下课时间
-        this.isEndLeave = SignOutTime.getTime() - date.getTime() <= _outTime;
+        this.isEndLeave = SignOutTime.getTime() - date.getTime() <= 0;
         //计算当前时间与下课时间的时间差
         this.getEndCountDown(SignOutTime, _outTime);
-        setInterval(_ => {
+        this.signTimeEnd = setInterval(_ => {
           vm.getEndCountDown(SignOutTime, _outTime);
         }, 1000);
         //判断是否已超过下课时间范围
@@ -277,6 +280,7 @@ export default {
           //当前时间大于上课时间，且已经超过上课打卡时间范围，已迟到
           this.isStartbeLate = true;
         }
+        clearInterval(this.signTimeStart);
       }
     },
     getEndCountDown(SignOutTime, _outTime) {
@@ -304,16 +308,18 @@ export default {
           });
         }
       } else {
-        if (diff <= _outTime && diff >= 0) {
-          //当前时间小于下课时间，且已经可以下课打卡
-          this.isEndLeave = true;
-        } else if (diff < 0 && diff >= -_outTime) {
+        // if (diff <= _outTime && diff >= 0) {
+        //   //当前时间小于下课时间，且已经可以下课打卡
+        //   this.isEndLeave = true;
+        // } else 
+        if (diff < 0 && diff >= -_outTime) {
           //当前时间小于下课时间，且可以下课打卡
           this.isEndLeave = true;
         } else if (diff < -_outTime) {
           //当前时间大于下课时间，且已经不能打卡
           this.isEndLeaveOut = true;
         }
+        clearInterval(this.signTimeEnd);
       }
     },
     getLocate() {
@@ -378,6 +384,8 @@ export default {
   },
   onLoad(o) {
     let vm = this;
+    clearInterval(vm.signTimeStart);
+    clearInterval(vm.signTimeEnd);
     this.$api
       .$signGet("学员课程详情", {
         id: o.id,

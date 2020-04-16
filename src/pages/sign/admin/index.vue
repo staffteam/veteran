@@ -44,8 +44,8 @@
                   <p :class="item.SignInStatus?'on':''">{{item.SignInStatus?'已签到':'未签到'}}</p>
                 </div>
                 <div>
-                  <h2>进场签到</h2>
-                  <p :class="item.SignOutStatus?'on':''">{{item.SignOutStatus?'已签到':'未签到'}}</p>
+                  <h2>课后签退</h2>
+                  <p :class="item.SignOutStatus?'on':''">{{item.SignOutStatus?'已签退':'未签退'}}</p>
                 </div>
               </div>
             </div>
