@@ -158,7 +158,7 @@ export default {
         this.thisDay = "";
         this.theDay = "";
       }
-      let begin = year + "-" + month + "-01 00:00:00";
+      let begin = year + "/" + month + "/01 00:00:00";
       let firstDate = new Date(begin);
       let lastDate = new Date(year, month, 0);
       let _endDay_ = lastDate.getDate();

@@ -102,6 +102,7 @@
       </div>
     </div>
     <hint :commonMsg="commonMsg" title="未在考勤区内" viceTitle="请重新定位" />
+    <div>{{ress}}</div>
   </div>
 </template>
 
@@ -110,6 +111,7 @@ import QQMapWX from "@/components/locate/qqmap-wx-jssdk.min.js";
 export default {
   data() {
     return {
+      ress: "",
       info: {
         title: "",
         teacher: "",
@@ -132,8 +134,8 @@ export default {
       commonMsg: false,
       isEndLeaveOut: false,
       signData: "",
-      signTimeStart:{},
-      signTimeEnd:{}
+      signTimeStart: {},
+      signTimeEnd: {}
     };
   },
   methods: {
@@ -311,7 +313,7 @@ export default {
         // if (diff <= _outTime && diff >= 0) {
         //   //当前时间小于下课时间，且已经可以下课打卡
         //   this.isEndLeave = true;
-        // } else 
+        // } else
         if (diff < 0 && diff >= -_outTime) {
           //当前时间小于下课时间，且可以下课打卡
           this.isEndLeave = true;
@@ -322,6 +324,32 @@ export default {
         clearInterval(this.signTimeEnd);
       }
     },
+    //计算两点位置距离
+    getDistance: function(lat1, lng1, lat2, lng2) {
+      lat1 = lat1 || 0;
+      lng1 = lng1 || 0;
+      lat2 = lat2 || 0;
+      lng2 = lng2 || 0;
+      var rad1 = lat1 * Math.PI / 180.0;
+      var rad2 = lat2 * Math.PI / 180.0;
+      var a = rad1 - rad2;
+      var b = lng1 * Math.PI / 180.0 - lng2 * Math.PI / 180.0;
+      var r = 6378137; //地球半径
+      var distance =
+        r *
+        2 *
+        Math.asin(
+          Math.sqrt(
+            Math.pow(Math.sin(a / 2), 2) +
+              Math.cos(rad1) * Math.cos(rad2) * Math.pow(Math.sin(b / 2), 2)
+          )
+        );
+      /*
+    if (distance > 1000){
+      distance = Math.round(distance / 1000);
+    }*/
+      return distance;
+    },
     getLocate() {
       let vm = this;
       mpvue.showLoading({
@@ -329,42 +357,69 @@ export default {
       });
       mpvue.getLocation({
         type: "gcj02",
-        // isHighAccuracy:true,
-        // highAccuracyExpireTime:4000,
         success: function(res) {
-          console.log(res);
           //2、根据坐标获取当前位置名称，显示在顶部:腾讯地图逆地址解析
-          vm.qqmapsdk.reverseGeocoder({
-            location: {
-              latitude: res.latitude,
-              longitude: res.longitude
-            },
-            success: function(data) {
+          vm.qqmapsdk.geocoder({
+            address: vm.info.locate,
+            success(item) {
               mpvue.hideLoading();
-              console.log(data.result);
-              let { city, district } = data.result.address_component;
-              let { title } = data.result.address_reference.landmark_l2;
-              let { recommend } = data.result.formatted_addresses;
-              if (recommend.indexOf(city) == -1) {
-                recommend = city + recommend;
-              }
-              let landmark_l2 = city + district + title;
-              landmark_l2 = landmark_l2.split("(")[0];
-              recommend = recommend.split("(")[0];
-              if (vm.info.locate.indexOf(recommend) == -1) {
-                if (vm.info.locate.indexOf(landmark_l2) >= 0) {
-                  vm.locateContent = landmark_l2;
-                  vm.signScope = true;
-                } else {
-                  vm.signScope = false;
-                  vm.locateContent = recommend;
-                }
-              } else {
+              let { lat, lng } = item.result.location;
+              let distance = vm.getDistance(
+                lat,
+                lng,
+                res.latitude,
+                res.longitude
+              );
+              vm.ress = JSON.stringify({
+                lat,
+                lng,
+                latitude: res.latitude,
+                longitude: res.longitude,
+                distance
+              });
+              if (distance <= 300) {
+                vm.locateContent = vm.info.locate;
                 vm.signScope = true;
-                vm.locateContent = recommend;
+              } else {
+                vm.getRess(res);
+                vm.signScope = false;
               }
             }
           });
+        }
+      });
+    },
+    getRess(res) {
+      let vm = this;
+      vm.qqmapsdk.reverseGeocoder({
+        location: {
+          latitude: res.latitude,
+          longitude: res.longitude,
+          isHighAccuracy: true,
+          highAccuracyExpireTime: 5000
+        },
+        success: function(data) {
+          let { city, district } = data.result.address_component;
+          let { title } = data.result.address_reference.landmark_l2;
+          let { recommend } = data.result.formatted_addresses;
+          if (recommend.indexOf(city) == -1) {
+            recommend = city + recommend;
+          }
+          let landmark_l2 = city + district + title;
+          landmark_l2 = landmark_l2.split("(")[0];
+          recommend = recommend.split("(")[0];
+          if (vm.info.locate.indexOf(recommend) == -1) {
+            if (vm.info.locate.indexOf(landmark_l2) >= 0) {
+              vm.locateContent = landmark_l2;
+              vm.signScope = true;
+            } else {
+              vm.signScope = false;
+              vm.locateContent = recommend;
+            }
+          } else {
+            vm.signScope = true;
+            vm.locateContent = recommend;
+          }
         }
       });
     }
