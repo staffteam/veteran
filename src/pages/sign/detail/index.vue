@@ -102,7 +102,7 @@
       </div>
     </div>
     <hint :commonMsg="commonMsg" title="未在考勤区内" viceTitle="请重新定位" />
-    <div>{{ress}}</div>
+    <!-- <div>{{ress}}</div> -->
   </div>
 </template>
 
