@@ -42,7 +42,8 @@ const path = {
   '未读消息':`${api}/SysMessage/GetCount`,
   '消息列表':`${api}/SysMessage/GetList`,
   '消息详情':`${api}/SysMessage/GetDetail`,
-  '投递简历':`${api}/Company/ResumeSend`
+  '投递简历':`${api}/Company/ResumeSend`,
+  '查看成绩':`${api}/exam/GetExamResult`
 };
 const load = {
   show() {

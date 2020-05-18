@@ -1,4 +1,4 @@
 {
-    "navigationBarTitleText": "学员考勤"
-  }
-  
+  "navigationBarTitleText": "学员考勤",
+  "enablePullDownRefresh": true
+}

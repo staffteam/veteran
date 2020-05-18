@@ -251,17 +251,23 @@ export default {
           icon: "success"
         });
         setTimeout(_ => {
-          mpvue.setStorageSync("examPrams", {
-            ...prams,
-            Name: vm.exam.Name,
-            PassScore: vm.exam.PassScore,
-            examResultList: examResultList,
-            MaxScore: vm.exam.Score
-          });
-          clearInterval(vm.timeObj);
-          mpvue.redirectTo({
-            url: "../../my/examResult/main"
-          });
+          if (vm.exam.StudentCount == 1 && !isPass) {
+            mpvue.redirectTo({
+              url: "../../my/examUp/main?id=" + vm.exam.Id
+            });
+          } else {
+            mpvue.setStorageSync("examPrams", {
+              ...prams,
+              Name: vm.exam.Name,
+              PassScore: vm.exam.PassScore,
+              examResultList: examResultList,
+              MaxScore: vm.exam.Score
+            });
+            clearInterval(vm.timeObj);
+            mpvue.redirectTo({
+              url: "../../my/examResult/main"
+            });
+          }
         }, 1500);
       });
     }

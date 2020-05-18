@@ -47,11 +47,32 @@ export default {
         userid: mpvue.getStorageSync("userid")
       })
       .then(res => {
+        try {
+          res.Data.Content = res.Data.Content.replace(
+            /<img([\s\w"-=\/\.:;]+)((?:(height="[^"]+")))/gi,
+            '<img$1 class="pho"'
+          )
+            .replace(
+              /<img([\s\w"-=\/\.:;]+)((?:(width="[^"]+")))/gi,
+              '<img$1 class="pho"'
+            )
+            .replace(
+              /<img([\s\w"-=\/\.:;]+)((?:(style="[^"]+")))/gi,
+              '<img$1 class="pho"'
+            )
+            .replace(
+              /<img([\s\w"-=\/\.:;]+)((?:(alt="[^"]+")))/gi,
+              '<img$1 class="pho"'
+            )
+            .replace(/<img([\s\w"-=\/\.:;]+)/gi, '<img$1 class="pho"');
+        } catch (error) {
+          console.log(error);
+        }
         vm.detail = res.Data;
         if (vm.detail.UpdateTime) {
           let timeArr = vm.detail.UpdateTime.split(":");
           vm.detail.UpdateTime = `${timeArr[0]}:${timeArr[1]}`;
-        }else{
+        } else {
           let timeArr = vm.detail.ActiveTime.split(":");
           vm.detail.UpdateTime = `${timeArr[0]}:${timeArr[1]}`;
         }

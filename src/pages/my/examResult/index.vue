@@ -14,14 +14,24 @@
           <span>{{exam.IsPass?'恭喜你，通过考试':'很遗憾，继续努力'}}</span>
         </div>
         <div class="list">
-          <p>答题用时：<span>{{exam.ExamTime}}分钟</span></p>
-          <p>合格分数：<span>{{exam.PassScore}}分</span></p>
+          <p>
+            答题用时：
+            <span>{{exam.ExamTime}}分钟</span>
+          </p>
+          <p>
+            合格分数：
+            <span>{{exam.PassScore}}分</span>
+          </p>
         </div>
       </div>
     </div>
     <div class="exam-detail-list">
       <ul>
-        <li v-for="(item,index) in exam.examResultList" :key="item.Id" :class="item.IsRight?'on':''">
+        <li
+          v-for="(item,index) in exam.examResultList"
+          :key="item.Id"
+          :class="item.IsRight?'on':''"
+        >
           <i class="iconfont icon-youxiajiaogouxuan" v-if="item.IsRight"></i>
           <i class="iconfont icon-del-right" v-if="!item.IsRight"></i>
           {{index+1}}
@@ -41,24 +51,24 @@ export default {
   data() {
     return {
       exam: {},
-      score: "80",
-      consuming: "20",
+      score: "",
+      consuming: "",
       isQualified: true,
       examListData: [
         { correct: true, id: 1 },
         { correct: false, id: 2 },
         { correct: true, id: 3 }
       ],
-      isError:true
+      isError: true
     };
   },
   methods: {
-    allAnalysis(){
+    allAnalysis() {
       mpvue.navigateTo({
         url: "../../my/examAnalysis/main?analysis=all"
       });
     },
-    errAnalysis(){
+    errAnalysis() {
       mpvue.navigateTo({
         url: "../../my/examAnalysis/main?analysis=err"
       });
@@ -74,11 +84,68 @@ export default {
       }
     });
     let vm = this;
-    this.exam = mpvue.getStorageSync("examPrams");
-    this.isError = this.exam.MaxScore!=this.exam.Score;
+    this.exam = mpvue.getStorageSync("examPrams") || {};
+    this.isError = this.exam.MaxScore != this.exam.Score;
   },
-  onLoad() {
+  onLoad(o) {
     let vm = this;
+    if (o.id) {
+      this.$api
+        .$signGet("查看成绩", {
+          userid: mpvue.getStorageSync("userid"),
+          subjectId: o.id
+        })
+        .then(res => {
+          let MaxScore = 0;
+          res.Data.Topics.forEach(item => {
+            MaxScore += item.Score;
+          });
+          let examJson = {};
+          res.Data.ExamDetails.forEach(item => {
+            if (examJson[item.SubjectTopicId]) {
+              examJson[item.SubjectTopicId][item.SubjectOptionId] = true;
+            } else {
+              examJson[item.SubjectTopicId] = {
+                [item.SubjectOptionId]: true
+              };
+            }
+          });
+          let examResultList = [];
+          res.Data.Topics.forEach(value => {
+            if (examJson[value.Id]) {
+              let IsRight = true;
+              value.OptionList.forEach(item => {
+                if (!item.IsRight && examJson[value.Id][item.Id]) {
+                  IsRight = false;
+                } else if (item.IsRight && !examJson[value.Id][item.Id]) {
+                  IsRight = false;
+                }
+              });
+              console.log(IsRight);
+              if (IsRight) {
+                examResultList.push({ Id: value.Id, IsRight: true });
+              } else {
+                examResultList.push({ Id: value.Id, IsRight: false });
+              }
+            }
+          });
+          console.log(examJson);
+          mpvue.setStorageSync("examPrams", {
+            SubjectId: res.Data.SubjectId,
+            StudentId: mpvue.getStorageSync("userid"),
+            Score: res.Data.Score,
+            IsPass: res.Data.IsPass,
+            ExamTime: res.Data.ExamTime,
+            ExamDetails: res.Data.ExamDetails,
+            Name: res.Data.Subject.Name,
+            PassScore: res.Data.Subject.PassScore,
+            examResultList: examResultList,
+            MaxScore: MaxScore
+          });
+          this.exam = mpvue.getStorageSync("examPrams") || {};
+          this.isError = this.exam.MaxScore != this.exam.Score;
+        });
+    }
   }
 };
 </script>
@@ -109,11 +176,11 @@ export default {
       margin: 0 30rpx;
       padding-top: 59rpx;
       height: 580rpx;
-      .score{
+      .score {
         width: 60%;
         margin: 0 auto;
         position: relative;
-        h2{
+        h2 {
           font-size: 100rpx;
           color: white;
           text-align: center;
@@ -122,7 +189,7 @@ export default {
           top: 70rpx;
           width: 100%;
         }
-        span{
+        span {
           display: block;
           position: absolute;
           bottom: 70rpx;
@@ -133,57 +200,57 @@ export default {
           color: white;
         }
       }
-      .list{
+      .list {
         margin-top: 25rpx;
         padding-left: 32%;
-        p{
+        p {
           color: #999;
           font-size: 28rpx;
           margin-top: 12rpx;
-          &:first-child{
+          &:first-child {
             margin-top: 0px;
           }
-          span{
+          span {
             color: #333;
           }
         }
       }
     }
   }
-  .exam-detail-list{
+  .exam-detail-list {
     margin: 25rpx 15rpx 25rpx;
-    ul{
+    ul {
       overflow: hidden;
-      li{
+      li {
         width: 60rpx;
         height: 60rpx;
         margin: 15rpx;
-        border: 1px solid #E53330;
+        border: 1px solid #e53330;
         line-height: 60rpx;
         text-align: center;
-        color: #E53330;
+        color: #e53330;
         position: relative;
         overflow: hidden;
-        float:left;
-        i{
+        float: left;
+        i {
           position: absolute;
           right: 0;
           bottom: 0;
           line-height: 30rpx;
           font-size: 30rpx;
-          color: #E53330;
+          color: #e53330;
         }
-        &.on{
-          border: 1px solid #64BE50;
-          color: #64BE50;
-          i{
-            color: #64BE50;
+        &.on {
+          border: 1px solid #64be50;
+          color: #64be50;
+          i {
+            color: #64be50;
           }
         }
       }
     }
   }
-  .go-exam-h{
+  .go-exam-h {
     height: 96rpx;
   }
   .go-exam {
@@ -192,8 +259,8 @@ export default {
     left: 0;
     width: 100%;
     height: 96rpx;
-    &.one{
-      p{
+    &.one {
+      p {
         width: 100%;
       }
     }

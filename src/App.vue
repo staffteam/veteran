@@ -142,7 +142,11 @@ button.userLogin {
 .content ._rich-text .p {
   margin: 5rpx 0;
 }
-
+._rich-text{
+    .pho {
+      max-width: 100% !important;
+    }
+}
 ._rich-texts {
   ._rich-text {
     .title_view {
@@ -396,7 +400,8 @@ button.userLogin {
   margin: 0;
 }
 
-._rich-text .ul, ._rich-text .ol {
+._rich-text .ul,
+._rich-text .ol {
   display: block;
   margin: 1em 0;
   padding-left: 16px;
@@ -412,11 +417,15 @@ button.userLogin {
   align-items: baseline;
   text-align: match-parent;
 }
-._rich-text .ul .ul, ._rich-text .ol .ul {
+._rich-text .ul .ul,
+._rich-text .ol .ul {
   list-style-type: circle;
 }
-._rich-text .ol .ol .ul, ._rich-text .ol .ul .ul, ._rich-text .ul .ol .ul, ._rich-text .ul .ul .ul {
-    list-style-type: square;
+._rich-text .ol .ol .ul,
+._rich-text .ol .ul .ul,
+._rich-text .ul .ol .ul,
+._rich-text .ul .ul .ul {
+  list-style-type: square;
 }
 
 ._rich-text .u {
@@ -435,12 +444,14 @@ button.userLogin {
 ._rich-text .table {
   width: 100%;
 }
-._rich-text .thead, ._rich-text .tfoot, ._rich-text .tr {
+._rich-text .thead,
+._rich-text .tfoot,
+._rich-text .tr {
   display: flex;
   flex-direction: row;
 }
 ._rich-text .tr {
-  width:100%;
+  width: 100%;
   display: flex;
   border-right: 1px solid #e0e0e0;
   border-bottom: 1px solid #e0e0e0;
@@ -462,7 +473,8 @@ button.userLogin {
   border-top: 1px solid #e0e0e0;
 }
 
-.exam-go .exam-go-main .exam-go-analysis .exam-analysis-content view,.exam-go .exam-go-main .exam-go-analysis .exam-analysis-content text{
-  font-size:30rpx !important;
+.exam-go .exam-go-main .exam-go-analysis .exam-analysis-content view,
+.exam-go .exam-go-main .exam-go-analysis .exam-analysis-content text {
+  font-size: 30rpx !important;
 }
 </style>

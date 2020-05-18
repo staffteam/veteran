@@ -110,6 +110,7 @@ export default {
           page: vm.pageNum
         })
         .then(res => {
+          wx.stopPullDownRefresh();
           if (res.Data.length > 0) {
             vm.isGet = true;
             vm.isLoading = false;
@@ -223,6 +224,28 @@ export default {
         timingFunc: "easeIn"
       }
     });
+    let vm = this;
+    if (vm.pid) {
+      vm.isGet = true;
+      vm.pageNum = 1;
+      vm.isLoading = false;
+      vm.isNotData = false;
+      vm.userData = [];
+      vm.userDataHost = [];
+      vm.getSignInfo();
+      vm.getData();
+    }
+  },
+  onPullDownRefresh: function() {
+    let vm = this;
+    vm.isGet = true;
+    vm.pageNum = 1;
+    vm.isLoading = false;
+    vm.isNotData = false;
+    vm.userData = [];
+    vm.userDataHost = [];
+    vm.getSignInfo();
+    vm.getData();
   },
   onLoad(o) {
     let vm = this;

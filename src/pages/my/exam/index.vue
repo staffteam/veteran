@@ -2,8 +2,8 @@
   <div>
     <div class="my-exam">
       <ul v-if="examListData.length>0">
-        <li v-for="item in examListData" :key="item.id" :class="item.IsPass || !item.StudentCount?'on':''">
-          <a :href="item.StudentCount && !item.IsPass?('../../my/examDetail/main?id='+item.Id):''">
+        <li v-for="item in examListData" :key="item.Id" :class="item.StudentCount && !item.IsPass && item.IsSignInOk?'':'on'">
+          <a :href="item.link">
             <div class="l">
               <p>
                 <img :src="item.Image || '/static/images/exam-back.png'" mode="aspectFill" />
@@ -13,18 +13,27 @@
             <div class="c">
               <h2 class="line">{{item.Name}}</h2>
               <p>
-                <span v-if="item.StudentCount!=null">提示：还有{{item.StudentCount}}次考试机会</span>
+                <span v-if="item.StudentCount!=null && !item.IsPass">提示：还有{{item.StudentCount}}次考试机会</span>
+                <span v-if="item.IsPass">提示：您已通过本次考试</span>
               </p>
               <div>
-                <p v-if="item.UserScore!=null">
-                  成绩
+                <p
+                  v-if="(item.UserScore!=null && item.IsHaveResult) || (item.UserScore!=null && item.StudentCount) || (item.UserScore!=null && item.IsPass)"
+                >
+                  成绩：
                   <span>{{item.UserScore}}</span>
                 </p>
                 <p v-if="item.UserScore==null">未考试</p>
-                <span>
+                <p v-if="item.UserScore!==null && !item.IsHaveResult && !item.StudentCount && !item.IsPass">成绩：待公布</p>
+                <span
+                >
                   进入考试
                   <i class="iconfont icon-you1"></i>
                 </span>
+                <!-- <span v-if="!item.IsShowScore && item.IsHaveResult">
+                  题目解析
+                  <i class="iconfont icon-you1"></i>
+                </span> -->
               </div>
             </div>
             <div class="qualified" v-if="item.IsPass">
@@ -34,7 +43,7 @@
         </li>
       </ul>
       <div class="not-exam" v-if="examListData.length==0">
-        <img src="/static/images/not-exam.jpg" mode="widthFix">
+        <img src="/static/images/not-exam.jpg" mode="widthFix" />
       </div>
     </div>
     <load-data v-if="examListData.length>0" :isLoading="isLoading" :isNotData="isNotData" />
@@ -64,6 +73,22 @@ export default {
   //   }
   // },
   methods: {
+    goLink(item) {
+      if (!item.IsHaveResult && !item.StudentCount && !item.IsPass) {
+        //等待成绩公布，显示等待公布状态
+        return "../../my/examUp/main?id=" + item.Id;
+      } 
+      // else if (!item.IsShowScore && item.IsHaveResult) {
+      //   //已公布成绩，查看成绩
+      //   return "../../my/examResult/main?id=" + item.Id;
+      // } 
+      else if (item.StudentCount > 0 && !item.IsPass && item.IsSignInOk) {
+        //考试机会大于0，且未通过考试,且达到考试条件
+        return "../../my/examDetail/main?id=" + item.Id;
+      } else {
+        return "";
+      }
+    },
     getData() {
       let vm = this;
       vm.isGet = false;
@@ -74,6 +99,10 @@ export default {
           userid: mpvue.getStorageSync("userid")
         })
         .then(res => {
+          res.Data = res.Data.map(item => {
+            item.link = this.goLink(item);
+            return item;
+          });
           vm.examListData = res.Data;
         });
     }
@@ -98,11 +127,11 @@ export default {
 <style lang="less" scoped>
 .my-exam {
   min-height: calc(~"100vh - 180rpx");
-  .not-exam{
+  .not-exam {
     width: 100%;
     height: 100vh;
-    img{
-      max-width:30%;
+    img {
+      max-width: 30%;
       position: relative;
       display: block;
       margin: 0 auto;
@@ -189,7 +218,6 @@ export default {
               span {
                 font-size: 40rpx;
                 color: #e53330;
-                margin-left: 9rpx;
                 font-weight: 600;
                 vertical-align: bottom;
               }

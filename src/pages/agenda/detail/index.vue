@@ -43,6 +43,27 @@ export default {
         id: o.id
       })
       .then(res => {
+        try {
+          res.Data.Content = res.Data.Content.replace(
+            /<img([\s\w"-=\/\.:;]+)((?:(height="[^"]+")))/gi,
+            '<img$1 class="pho"'
+          )
+            .replace(
+              /<img([\s\w"-=\/\.:;]+)((?:(width="[^"]+")))/gi,
+              '<img$1 class="pho"'
+            )
+            .replace(
+              /<img([\s\w"-=\/\.:;]+)((?:(style="[^"]+")))/gi,
+              '<img$1 class="pho"'
+            )
+            .replace(
+              /<img([\s\w"-=\/\.:;]+)((?:(alt="[^"]+")))/gi,
+              '<img$1 class="pho"'
+            )
+            .replace(/<img([\s\w"-=\/\.:;]+)/gi, '<img$1 class="pho"');
+        } catch (error) {
+          console.log(error);
+        }
         vm.detail = res.Data;
       });
   }
