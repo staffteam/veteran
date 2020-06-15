@@ -56,10 +56,10 @@ export default {
           if (res.Data.rows.length > 0) {
             vm.isGet = true;
             vm.isLoading = false;
-            vm.courseData = res.Data.rows.map(value=>{
+            vm.courseData = [...vm.courseData,...res.Data.rows.map(value=>{
               value.ActiveTime = value.ActiveTime.split(' ')[0];
               return value;
-            });
+            })];
           } else {
             vm.isGet = false;
             vm.isLoading = false;
