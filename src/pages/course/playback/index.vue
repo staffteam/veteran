@@ -77,10 +77,14 @@ export default {
         timingFunc: "easeIn"
       }
     });
+    this.courseData= [];
+    this.isGet = true;
+    this.pageNum = 1;
+    this.getData();
   },
   onLoad() {
     let vm = this;
-    this.getData();
+    
   }
 };
 </script>

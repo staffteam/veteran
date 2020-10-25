@@ -77,7 +77,7 @@ export default {
               title: "签到成功",
               icon: "success"
             });
-            vm.IsSignIn = true;
+            vm.detail.IsSignIn = true;
             vm.detail.SignInList.push(vm.userInfo.Name);
             vm.detail.SignInTotal = vm.detail.SignInList.length;
           });
